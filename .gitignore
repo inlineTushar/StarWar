@@ -1,0 +1,102 @@
+# ======================
+# General Exclusions
+# ======================
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.lock
+
+# ======================
+# Kotlin Multiplatform Specific
+# ======================
+
+# Kotlin Native builds
+*.kexe
+*.klib
+
+# Intermediate and build directories
+*.dSYM/
+*.framework
+*.module
+*.swiftsourceinfo
+
+# CInterops and binaries
+cinterop/
+bin/
+.cxx
+
+# ======================
+# Android Specific
+# ======================
+
+# Android build files
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Local configuration
+local.properties
+
+# Gradle cache and generated files
+.gradle/
+build/
+
+# Android Studio files
+.navigation/
+captures/
+.externalNativeBuild/
+.kotlin
+
+# CocoaPods
+Pods/
+DerivedData/
+*.xcuserstate
+
+# ======================
+# Version Control
+# ======================
+
+# IntelliJ IDEA
+.idea/*
+!/.idea/codeStyles
+/.idea/codeStyles/*
+!/.idea/codeStyles/Project.xml
+!/.idea/codeStyles/codeStyleConfig.xml
+!.idea/icon.png
+
+*.iml
+
+# Other VCS-related files
+vcs.xml
+
+# ======================
+# Linting
+# ======================
+
+# Lint intermediate and output files
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+
+# ======================
+# Miscellaneous
+# ======================
+
+# Proguard (used in older Android builds)
+proguard/
+
+# macOS-specific
+*.DS_Store
+**/*.DS_Store
