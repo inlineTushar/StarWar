@@ -1,5 +1,8 @@
 package com.tsaha.nucleus.data
 
+import com.tsaha.nucleus.data.api.PlanetApi
+import com.tsaha.nucleus.data.di.dataModule
+import com.tsaha.nucleus.data.repository.PlanetRepository
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -14,7 +17,7 @@ import org.koin.test.inject
 
 /**
  * Data layer unit test to ensure all dependencies are properly configured and can be resolved.
- * TODO: Update this test when the data module components are implemented.
+ * Updated to test interface-based repository injection (PlanetRepository interface -> PlanetRepositoryImpl).
  */
 class DataModuleTest : KoinTest {
 
@@ -72,8 +75,7 @@ class DataModuleTest : KoinTest {
         assertEquals(exception, result.exceptionOrNull())
     }
 
-    // TODO: Uncomment and implement when data module components are created
-    /*
+    // TODO: Uncomment and implement when data module components are ready for integration testing
     @Test
     fun `verify dataModule provides all required dependencies`() {
         // Start Koin with dataModule
@@ -82,18 +84,18 @@ class DataModuleTest : KoinTest {
         }
 
         val httpClient: HttpClient by inject()
-        val networkDataSource: NetworkDataSource by inject()
-        val planetRepository: PlanetRepository by inject()
+        val planetApi: PlanetApi by inject() // Interface injection
+        val planetRepository: PlanetRepository by inject() // Interface injection
 
         assertNotNull(httpClient)
-        assertNotNull(networkDataSource)
+        assertNotNull(planetApi)
         assertNotNull(planetRepository)
 
         httpClient.close()
     }
 
     @Test
-    fun `verify repository integration with dependencies`() {
+    fun `verify planet repository integration with dependencies`() = runTest {
         startKoin {
             modules(dataModule)
         }
@@ -103,15 +105,24 @@ class DataModuleTest : KoinTest {
         // Test that the repository was properly constructed with dependencies
         assertNotNull(planetRepository)
 
-        // You could test actual functionality here if you had a mock server
-        // val result = planetRepository.getPlanetDetails("test-planet")
+        // You could test actual functionality here with a mock server
+        // val result = planetRepository.getPlanets(pageNumber = 1, limit = 10)
         // assertTrue(result.isSuccess || result.isFailure) // Either is valid for network calls
     }
 
     @Test
-    fun `verify safeApiCall handles network errors properly`() {
-        // val result = BaseRepository().safeApiCall { throw Exception("Test error") }
-        // assertTrue(result.isFailure)
+    fun `verify planet repository parameter validation`() = runTest {
+        startKoin {
+            modules(dataModule)
+        }
+
+        val planetRepository: PlanetRepository by inject()
+
+        // Test parameter validation
+        val invalidPageResult = planetRepository.getPlanets(pageNumber = 0, limit = 10)
+        assertTrue(invalidPageResult.isFailure)
+
+        val invalidLimitResult = planetRepository.getPlanets(pageNumber = 1, limit = -1)
+        assertTrue(invalidLimitResult.isFailure)
     }
-    */
 }
