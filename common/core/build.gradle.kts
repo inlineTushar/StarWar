@@ -5,9 +5,6 @@ plugins {
 
 android {
     namespace = "com.tsaha.nucleus.core"
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {

@@ -27,6 +27,7 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 "implementation"(project(":common:navigation"))
                 "implementation"(project(":common:core"))
                 "implementation"(project(":common:ui"))
+                "implementation"(project(":common:data"))
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.tsaha.nucleus.core.di
 
-import com.tsaha.nucleus.core.network.httpModule
+import org.koin.dsl.module
 
-val coreModule = httpModule
+val coreModule = module {
+
+}

@@ -8,6 +8,6 @@ android {
 
 dependencies {
     // Feature modules - app-specific dependencies
-    implementation(project(":feature:starlist"))
-    implementation(project(":feature:stardetail"))
+    implementation(project(":feature:planetlist"))
+    implementation(project(":feature:planetdetail"))
 }
