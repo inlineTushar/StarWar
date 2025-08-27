@@ -22,7 +22,7 @@ import com.tsaha.nucleus.ui.theme.NucleusTheme
 fun NucleusAppBar(
     title: String,
     isBackVisible: Boolean,
-    onBack: () -> Unit,
+    onBack: () -> Unit = {},
     backgroundColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary
 ) {

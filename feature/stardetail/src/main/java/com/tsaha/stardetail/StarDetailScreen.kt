@@ -1,4 +1,4 @@
-package com.tsaha.starlist
+package com.tsaha.stardetail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,27 +8,32 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.tsaha.navigation.NavigableGraph
+import com.tsaha.feature.stardetail.R
 import com.tsaha.navigation.OnNavigateTo
+import com.tsaha.navigation.ToBack
 import com.tsaha.nucleus.ui.component.NucleusAppBar
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 
 @Composable
-fun StarListScaffold(
+fun StarDetailScreen(
+    starId: String,
     modifier: Modifier = Modifier,
     onNavigate: OnNavigateTo,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             NucleusAppBar(
-                title = "Star World",
-                isBackVisible = false,
-                onBack = { onNavigate(NavigableGraph.StarDetails) {} })
+                title = stringResource(id = R.string.feature_stardetail_title),
+                isBackVisible = true,
+                onBack = { onNavigate(ToBack) {} }
+            )
         },
-        modifier = modifier.fillMaxSize()
     ) { contentPadding ->
         Column(
             verticalArrangement = Arrangement.Center,
@@ -37,8 +42,8 @@ fun StarListScaffold(
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            Button(onClick = { onNavigate(NavigableGraph.StarDetails) {} }) {
-                Text(text = "Star List")
+            Button(onClick = {}) {
+                Text(text = "Star Details $starId")
             }
         }
     }
@@ -46,8 +51,8 @@ fun StarListScaffold(
 
 @Preview(showBackground = true)
 @Composable
-private fun StarListScaffoldPreview() {
+private fun StarDetailScreenPreview() {
     NucleusTheme {
-        StarListScaffold(onNavigate = { _, _ -> })
+        StarDetailScreen(starId = "XB123", onNavigate = { _, _ -> })
     }
 }

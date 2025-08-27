@@ -9,10 +9,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.tsaha.navigation.Navigable
 import com.tsaha.navigation.NavigableGraph
-import com.tsaha.navigation.PreviousScreen
-import com.tsaha.stardetail.StarDetailScaffold
-import com.tsaha.starlist.StarListScaffold
+import com.tsaha.navigation.ToBack
+import com.tsaha.stardetail.StarDetailScreen
+import com.tsaha.starlist.StarListScreen
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.toRoute
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 
 @Composable
@@ -25,7 +26,7 @@ internal fun MainNavGraph(
         startDestination = startDestination,
     ) {
         composable<NavigableGraph.StarList> {
-            StarListScaffold { destination, optionBuilder ->
+            StarListScreen { destination, optionBuilder ->
                 navController.navigateTo(
                     destination = destination,
                     navOptions = navOptions(optionBuilder)
@@ -33,8 +34,11 @@ internal fun MainNavGraph(
             }
         }
 
-        composable<NavigableGraph.StarDetails> {
-            StarDetailScaffold { destination, optionBuilder ->
+        composable<NavigableGraph.StarDetails> { backStackEntry ->
+            val starDetails = backStackEntry.toRoute<NavigableGraph.StarDetails>()
+            StarDetailScreen(
+                starId = starDetails.starId
+            ) { destination, optionBuilder ->
                 navController.navigateTo(
                     destination = destination,
                     navOptions = navOptions(optionBuilder)
@@ -49,7 +53,7 @@ private fun NavHostController.navigateTo(
     navOptions: NavOptions?,
 ) {
     when (destination) {
-        is PreviousScreen -> if (previousBackStackEntry != null) popBackStack()
+        is ToBack -> if (previousBackStackEntry != null) popBackStack()
         else -> navigate(route = destination, navOptions = navOptions)
     }
 }
