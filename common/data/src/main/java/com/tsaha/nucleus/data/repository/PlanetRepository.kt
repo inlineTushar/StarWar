@@ -2,6 +2,7 @@ package com.tsaha.nucleus.data.repository
 
 import com.tsaha.nucleus.data.model.PaginationInfo
 import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetail
 
 /**
  * Repository interface for planet-related data operations
@@ -26,4 +27,11 @@ interface PlanetRepository {
      * @return Result containing Pair of PaginationInfo and List of Planets
      */
     suspend fun getFirstPage(limit: Int = 10): Result<Pair<PaginationInfo, List<Planet>>>
+
+    /**
+     * Fetches detailed information for a specific planet
+     * @param id The planet ID (uid) to fetch details for
+     * @return Result containing PlanetDetail with detailed information
+     */
+    suspend fun getPlanet(id: String): Result<PlanetDetail>
 }

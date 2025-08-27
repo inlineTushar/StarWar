@@ -3,6 +3,7 @@ package com.tsaha.nucleus.data.repository
 import com.tsaha.nucleus.data.api.PlanetApi
 import com.tsaha.nucleus.data.model.PaginationInfo
 import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetail
 
 /**
  * Implementation of PlanetRepository using remote API
@@ -32,5 +33,16 @@ class PlanetRepositoryImpl(
 
     override suspend fun getFirstPage(limit: Int): Result<Pair<PaginationInfo, List<Planet>>> {
         return getPlanets(pageNumber = 1, limit = limit)
+    }
+
+    override suspend fun getPlanet(id: String): Result<PlanetDetail> {
+        return try {
+            require(id.isNotBlank()) { "Planet ID cannot be blank" }
+            planetApi.getPlanet(id)
+        } catch (e: IllegalArgumentException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

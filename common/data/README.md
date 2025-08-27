@@ -6,16 +6,18 @@ the [SWAPI (Star Wars API)](https://swapi.tech) with Ktor HTTP client and Koin d
 ## Features
 
 - **Planets API**: Fetch paginated planets from SWAPI
+- **Planet Details API**: Fetch detailed information for specific planets
 - **Ktor Integration**: HTTP client with proper error handling
 - **Koin DI**: Parameterized dependency injection with interface binding
 - **Kotlin Result**: Type-safe error handling
 - **Pagination Support**: Check for next pages
 - **Clean Architecture**: Interface-based design for better testability
 
-## API Endpoint
+## API Endpoints
 
 ```
-GET https://swapi.tech/api/planets?page=1&limit=10
+GET https://swapi.tech/api/planets?page=1&limit=10           # Planet list
+GET https://www.swapi.tech/api/planets/{id}                   # Planet details
 ```
 
 ## Architecture
@@ -33,8 +35,7 @@ PlanetRepository ←→ PlanetRepositoryImpl
 
 ### 1. Data Models
 
-#### `Planet`
-
+#### `Planet` (List Response)
 ```kotlin
 @Serializable
 data class Planet(
@@ -44,8 +45,21 @@ data class Planet(
 )
 ```
 
-#### `PaginationInfo`
+#### `PlanetDetail` (Detail Response)
 
+```kotlin
+@Serializable
+data class PlanetDetail(
+    val name: String,
+    val climate: String,
+    val population: String,
+    val diameter: String,
+    val gravity: String,
+    val terrain: String
+)
+```
+
+#### `PaginationInfo`
 ```kotlin
 data class PaginationInfo(
     val hasNext: Boolean
@@ -55,10 +69,10 @@ data class PaginationInfo(
 ### 2. API Layer
 
 #### Interface
-
 ```kotlin
 interface PlanetApi {
     suspend fun getPlanets(pageNumber: Int, limit: Int): Result<Pair<PaginationInfo, List<Planet>>>
+    suspend fun getPlanet(id: String): Result<PlanetDetail>
 }
 ```
 
@@ -66,26 +80,25 @@ interface PlanetApi {
 
 ```kotlin
 class PlanetApiImpl(private val httpClient: HttpClient) : PlanetApi {
-    // Ktor HTTP implementation
+    // Ktor HTTP implementation for both endpoints
 }
 ```
 
 ### 3. Repository Layer
 
 #### Interface
-
 ```kotlin
 interface PlanetRepository {
     suspend fun getPlanets(pageNumber: Int = 1, limit: Int = 10): Result<Pair<PaginationInfo, List<Planet>>>
     suspend fun getFirstPage(limit: Int = 10): Result<Pair<PaginationInfo, List<Planet>>>
+    suspend fun getPlanet(id: String): Result<PlanetDetail>
 }
 ```
 
 #### Implementation
-
 ```kotlin
 class PlanetRepositoryImpl(private val planetApi: PlanetApi) : PlanetRepository {
-    // Business logic and validation
+    // Business logic and validation for both list and detail operations
 }
 ```
 
@@ -126,7 +139,7 @@ class YourClass : KoinComponent {
 }
 ```
 
-### 3. Fetch Planets
+### 3. Fetch Planet List
 
 ```kotlin
 // Fetch first page
@@ -144,6 +157,53 @@ result.onSuccess { (paginationInfo, planets) ->
 val pageResult = planetRepository.getPlanets(pageNumber = 2, limit = 5)
 ```
 
+### 4. Fetch Planet Details
+
+```kotlin
+// Get planet details using uid from the list
+val planetId = "1" // Tatooine
+val detailResult = planetRepository.getPlanet(planetId)
+
+detailResult.onSuccess { planetDetail ->
+    println("Planet: ${planetDetail.name}")
+    println("Climate: ${planetDetail.climate}")
+    println("Population: ${planetDetail.population}")
+    println("Diameter: ${planetDetail.diameter}")
+    println("Gravity: ${planetDetail.gravity}")
+    println("Terrain: ${planetDetail.terrain}")
+}
+```
+
+### 5. Complete Usage Example
+
+```kotlin
+class PlanetService : KoinComponent {
+    private val planetRepository: PlanetRepository by inject()
+    
+    suspend fun loadPlanetWithDetails() {
+        // First, get the list of planets
+        planetRepository.getFirstPage(limit = 5)
+            .onSuccess { (pagination, planets) ->
+                println("Found ${planets.size} planets")
+                
+                // Then get details for each planet
+                planets.forEach { planet ->
+                    planetRepository.getPlanet(planet.uid)
+                        .onSuccess { detail ->
+                            println("${detail.name}: ${detail.climate} climate, population ${detail.population}")
+                        }
+                        .onFailure { error ->
+                            println("Failed to get details for ${planet.name}: ${error.message}")
+                        }
+                }
+            }
+            .onFailure { error ->
+                println("Failed to load planets: ${error.message}")
+            }
+    }
+}
+```
+
 ## Benefits of Interface Pattern
 
 ✅ **Testability**: Easy to mock interfaces for unit tests  
@@ -156,16 +216,22 @@ val pageResult = planetRepository.getPlanets(pageNumber = 2, limit = 5)
 The API returns `Result<T>` for type-safe error handling:
 
 ```kotlin
+// Planet list error handling
 planetRepository.getPlanets(1, 10)
     .onSuccess { (pagination, planets) -> 
         // Handle success
     }
     .onFailure { exception -> 
-        // Handle error
         when (exception) {
             is IllegalArgumentException -> // Parameter validation error
             else -> // Network or parsing error
         }
+    }
+
+// Planet detail error handling  
+planetRepository.getPlanet("invalid-id")
+    .onFailure { exception ->
+        // Handle API errors (404, network issues, etc.)
     }
 ```
 
@@ -177,9 +243,9 @@ This module uses:
 - **Koin**: For dependency injection with interface binding
 - **Kotlin Coroutines**: For async operations
 
-## Example Response
+## Example API Responses
 
-The API returns planets in this format:
+### Planet List Response
 ```json
 {
   "message": "ok",
@@ -191,6 +257,25 @@ The API returns planets in this format:
       "url": "https://www.swapi.tech/api/planets/1"
     }
   ]
+}
+```
+
+### Planet Detail Response
+
+```json
+{
+  "message": "ok",
+  "result": {
+    "properties": {
+      "name": "Tatooine",
+      "climate": "arid",
+      "population": "200000",
+      "diameter": "10465",
+      "gravity": "1 standard",
+      "terrain": "desert"
+    },
+    "uid": "1"
+  }
 }
 ```
 
