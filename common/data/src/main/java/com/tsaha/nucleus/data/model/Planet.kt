@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Planet(
     val uid: String,
-    val name: String,
-    val url: String
+    val name: String
 )

@@ -1,0 +1,21 @@
+package com.tsaha.planetlist.model
+
+import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetails
+
+sealed class PlanetListUiState {
+    data object ListLoading : PlanetListUiState()
+    data class ListError(val errorMessage: String? = null) : PlanetListUiState()
+    data class ListSuccess(val planetItems: List<PlanetItem>) : PlanetListUiState()
+}
+
+data class PlanetItem(
+    val planet: Planet,
+    val detailsState: PlanetDetailsUiState = PlanetDetailsUiState.DetailsLoading
+)
+
+sealed class PlanetDetailsUiState {
+    data object DetailsLoading : PlanetDetailsUiState()
+    data class DetailsError(val errorMessage: String? = null) : PlanetDetailsUiState()
+    data class DetailsSuccess(val details: PlanetDetails) : PlanetDetailsUiState()
+}

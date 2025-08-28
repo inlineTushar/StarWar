@@ -1,13 +1,18 @@
 package com.tsaha.planetlist
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
-//sealed class PlanetListUiState {
-//    data object Loading : PlanetListUiState()
-//    data object Error : PlanetListUiState()
-//    data class Success(val planets: List<Planet>) : PlanetListUiState()
-//}
-
-class PlanetListViewModel : ViewModel() {
-
+class PlanetListViewModel(
+    planetListUseCase: PlanetListUiUseCase
+) : ViewModel() {
+    val uiState = planetListUseCase.observePlanets()
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+            initialValue = ListLoading
+        )
 }

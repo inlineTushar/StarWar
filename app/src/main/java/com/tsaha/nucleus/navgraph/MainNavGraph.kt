@@ -26,12 +26,14 @@ internal fun MainNavGraph(
         startDestination = startDestination,
     ) {
         composable<NavigableGraph.PlanetList> {
-            PlanetListScreen { destination, optionBuilder ->
-                navController.navigateTo(
-                    destination = destination,
-                    navOptions = navOptions(optionBuilder)
-                )
-            }
+            PlanetListScreen(
+                onNavigate = { destination, optionBuilder ->
+                    navController.navigateTo(
+                        destination = destination,
+                        navOptions = navOptions(optionBuilder)
+                    )
+                }
+            )
         }
 
         composable<NavigableGraph.PlanetDetails> { backStackEntry ->

@@ -31,6 +31,8 @@ dependencies {
     // AndroidX Core (useful for data operations)
     api(libs.androidx.core.ktx)
 
+    implementation(project(":common:core"))
+
     // Testing dependencies
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

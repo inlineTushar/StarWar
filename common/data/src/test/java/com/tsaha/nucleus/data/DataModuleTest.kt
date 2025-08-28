@@ -119,10 +119,10 @@ class DataModuleTest : KoinTest {
         val planetRepository: PlanetRepository by inject()
 
         // Test parameter validation
-        val invalidPageResult = planetRepository.getPlanets(pageNumber = 0, limit = 10)
+        val invalidPageResult = planetRepository.getPlanetsWithPagination(pageNumber = 0, limit = 10)
         assertTrue(invalidPageResult.isFailure)
 
-        val invalidLimitResult = planetRepository.getPlanets(pageNumber = 1, limit = -1)
+        val invalidLimitResult = planetRepository.getPlanetsWithPagination(pageNumber = 1, limit = -1)
         assertTrue(invalidLimitResult.isFailure)
     }
 }

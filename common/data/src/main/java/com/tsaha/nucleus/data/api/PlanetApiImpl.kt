@@ -1,8 +1,8 @@
 package com.tsaha.nucleus.data.api
 
-import com.tsaha.nucleus.data.model.PaginationInfo
+import com.tsaha.nucleus.data.model.Pagination
 import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetail
+import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.data.model.PlanetsApiResponse
 import com.tsaha.nucleus.data.model.PlanetDetailApiResponse
 import io.ktor.client.HttpClient
@@ -26,30 +26,30 @@ class PlanetApiImpl(
     override suspend fun getPlanets(
         pageNumber: Int,
         limit: Int
-    ): Result<Pair<PaginationInfo, List<Planet>>> {
+    ): Result<Pair<Pagination, List<Planet>>> {
         return try {
             val response = httpClient.get(PLANETS_ENDPOINT) {
                 parameter("page", pageNumber)
                 parameter("limit", limit)
             }.body<PlanetsApiResponse>()
 
-            val paginationInfo = PaginationInfo(
+            val pagination = Pagination(
                 currentPage = pageNumber,
                 nextPage = response.next
             )
             val planets = response.results
-            Result.success(paginationInfo to planets)
+            Result.success(pagination to planets)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getPlanet(id: String): Result<PlanetDetail> {
+    override suspend fun getPlanet(id: String): Result<PlanetDetails> {
         return try {
             val response = httpClient.get("$PLANETS_ENDPOINT/$id")
                 .body<PlanetDetailApiResponse>()
 
-            val planetDetail = PlanetDetail(
+            val planetDetails = PlanetDetails(
                 uid = response.result.uid,
                 name = response.result.properties.name,
                 climate = response.result.properties.climate,
@@ -59,7 +59,7 @@ class PlanetApiImpl(
                 terrain = response.result.properties.terrain
             )
 
-            Result.success(planetDetail)
+            Result.success(planetDetails)
         } catch (e: Exception) {
             Result.failure(e)
         }
