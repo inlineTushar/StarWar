@@ -4,8 +4,9 @@ import com.tsaha.nucleus.core.network.CONCURRENT_REQUESTS
 import com.tsaha.nucleus.core.network.PAGE_SIZE
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.repository.PlanetRepository
-import com.tsaha.planetlist.model.PlanetDetailsUiState
-import com.tsaha.planetlist.model.PlanetDetailsUiState.DetailsLoading
+import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
+import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
+import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
 import com.tsaha.planetlist.model.PlanetItem
 import com.tsaha.planetlist.model.PlanetListUiState
 import com.tsaha.planetlist.model.PlanetListUiState.ListError
@@ -23,8 +24,6 @@ import kotlinx.coroutines.flow.flowOn
 class PlanetListUiUseCase(
     private val planetRepository: PlanetRepository
 ) {
-    private val cache = mutableMapOf<String, PlanetDetailsUiState>()
-
     fun observePlanets(
         concurrency: Int = CONCURRENT_REQUESTS,
         pageSize: Int = PAGE_SIZE
@@ -45,7 +44,8 @@ class PlanetListUiUseCase(
         val currentItems = planets.map { planet ->
             PlanetItem(
                 planet = planet,
-                detailsState = cache[planet.uid] ?: DetailsLoading
+                detailsState = planetRepository.cache[planet.uid]?.let { DetailsSuccess(it) }
+                    ?: DetailsLoading
             )
         }.toMutableList()
 
@@ -54,18 +54,20 @@ class PlanetListUiUseCase(
         val planetIds = planets.map { it.uid }
 
         planetIds.asFlow()
-            .filter { it !in cache } // skip already in cache
+            .filter { it !in planetRepository.cache } // skip already in cache
             .flatMapMerge(concurrency = concurrency) { id ->
                 flow {
                     val detailsState =
                         planetRepository.getPlanet(id).getOrNull()
-                            ?.let { PlanetDetailsUiState.DetailsSuccess(it) }
-                            ?: PlanetDetailsUiState.DetailsError()
+                            ?.let { DetailsSuccess(it) }
+                            ?: DetailsError()
                     emit(id to detailsState)
                 }
             }
             .collect { (id, detailsState) ->
-                cache[id] = detailsState
+                if (detailsState is DetailsSuccess) {
+                    planetRepository.cache[id] = detailsState.details
+                }
                 indexById[id]?.let { idx ->
                     currentItems[idx] = currentItems[idx].copy(detailsState = detailsState)
                     send(ListSuccess(currentItems.toList()))

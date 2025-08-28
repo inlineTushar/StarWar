@@ -1,7 +1,7 @@
 package com.tsaha.planetlist.model
 
 import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.ui.PlanetDetailsUiState
 
 sealed class PlanetListUiState {
     data object ListLoading : PlanetListUiState()
@@ -13,9 +13,3 @@ data class PlanetItem(
     val planet: Planet,
     val detailsState: PlanetDetailsUiState = PlanetDetailsUiState.DetailsLoading
 )
-
-sealed class PlanetDetailsUiState {
-    data object DetailsLoading : PlanetDetailsUiState()
-    data class DetailsError(val errorMessage: String? = null) : PlanetDetailsUiState()
-    data class DetailsSuccess(val details: PlanetDetails) : PlanetDetailsUiState()
-}

@@ -11,6 +11,8 @@ import com.tsaha.nucleus.data.model.PlanetDetails
  */
 interface PlanetRepository {
 
+    val cache : MutableMap<String, PlanetDetails>
+
     /**
      * Fetches planets from the remote API
      * @param pageNumber The page number to fetch (starting from 1)

@@ -14,12 +14,13 @@ class PlanetRepositoryImpl(
     private val planetApi: PlanetApi
 ) : PlanetRepository {
 
+    override val cache: MutableMap<String, PlanetDetails> = mutableMapOf()
+
     override suspend fun getPlanetsWithPagination(
         pageNumber: Int,
         limit: Int
     ): Result<Pair<Pagination, List<Planet>>> {
         return try {
-            // Validate parameters
             require(pageNumber >= 1) { "Page number must be >= 1" }
             require(limit > 0) { "Limit must be > 0" }
             planetApi.getPlanets(pageNumber, limit)
