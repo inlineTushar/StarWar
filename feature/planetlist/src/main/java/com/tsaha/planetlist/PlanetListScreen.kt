@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,14 +67,11 @@ private fun PlanetListComposable(
             )
         }
     ) { padding ->
-        val listState = rememberLazyListState()
-
         when (val current = state) {
             ListLoading -> ProgressBarComposable(modifier = Modifier.padding(padding))
 
             is ListSuccess ->
                 LazyColumn(
-                    state = listState,
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize()

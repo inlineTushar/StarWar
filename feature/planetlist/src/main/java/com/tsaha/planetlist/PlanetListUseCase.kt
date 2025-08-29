@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-class PlanetListUiUseCase(
+class PlanetListUseCase(
     private val planetRepository: PlanetRepository
 ) {
     fun observePlanets(
@@ -52,17 +52,17 @@ class PlanetListUiUseCase(
         planets.asFlow()
             .flatMapMerge(concurrency = concurrency) { planet ->
                 flow {
-                    val detailsState =
+                    val planetDetails =
                         planetRepository.getPlanet(planet.uid).getOrNull()
                             ?.let { DetailsSuccess(it) }
                             ?: DetailsError()
-                    emit(planet to detailsState)
+                    emit(planet to planetDetails)
                 }
             }
-            .collect { (planet, detailsState) ->
+            .collect { (planet, planetDetails) ->
                 indexById[planet.uid]?.let { idx ->
                     if (currentItems[idx].detailsState is DetailsLoading) {
-                        currentItems[idx] = currentItems[idx].copy(detailsState = detailsState)
+                        currentItems[idx] = currentItems[idx].copy(detailsState = planetDetails)
                         send(ListSuccess(currentItems.toList()))
                     }
                 }
