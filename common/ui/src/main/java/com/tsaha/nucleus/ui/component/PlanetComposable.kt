@@ -23,7 +23,10 @@ fun PlanetComposable(
 }
 
 @Composable
-fun PlanetNameComposable(name: String, modifier: Modifier = Modifier) {
+fun PlanetNameComposable(
+    name: String,
+    modifier: Modifier = Modifier
+) {
     Text(
         text = name,
         modifier = modifier.fillMaxWidth(),

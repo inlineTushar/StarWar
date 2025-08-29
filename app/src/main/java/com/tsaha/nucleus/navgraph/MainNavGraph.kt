@@ -1,63 +1,43 @@
 package com.tsaha.nucleus.navgraph
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
-import com.tsaha.navigation.Navigable
-import com.tsaha.navigation.NavigableGraph
-import com.tsaha.navigation.ToBack
-import com.tsaha.planetlist.PlanetListScreen
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.toRoute
-import com.tsaha.navigation.NavigableGraph.*
+import androidx.navigation.navArgument
+import com.tsaha.navigation.Route
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetdetail.PlanetDetailsScreen
+import com.tsaha.planetlist.PlanetListScreen
 
 @Composable
 internal fun MainNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: NavigableGraph = PlanetListNavigable,
+    startDestination: Route = Route.PlanetList,
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = startDestination.value,
     ) {
-        composable<PlanetListNavigable> {
-            PlanetListScreen(
-                onNavigate = { destination, optionBuilder ->
-                    navController.navigateTo(
-                        destination = destination,
-                        navOptions = navOptions(optionBuilder)
-                    )
+        composable(route = Route.PlanetList.value) {
+            PlanetListScreen(navController = navController)
+        }
+        composable(
+            route = Route.PlanetDetails.value,
+            arguments = listOf(
+                navArgument("planetId") {
+                    type = NavType.StringType
+                    nullable = false
                 }
             )
+        ) { backStackEntry ->
+            val planetId = backStackEntry.arguments?.getString("planetId")
+            requireNotNull(planetId) { "planetId cannot be null" }
+            PlanetDetailsScreen(planetId, navController = navController)
         }
-
-        composable<PlanetDetailsNavigable> { backStackEntry ->
-            val planetDetails = backStackEntry.toRoute<PlanetDetailsNavigable>()
-            PlanetDetailsScreen(
-                planetId = planetDetails.planetId
-            ) { destination, optionBuilder ->
-                navController.navigateTo(
-                    destination = destination,
-                    navOptions = navOptions(optionBuilder)
-                )
-            }
-        }
-    }
-}
-
-private fun NavHostController.navigateTo(
-    destination: Navigable,
-    navOptions: NavOptions?,
-) {
-    when (destination) {
-        is ToBack -> if (previousBackStackEntry != null) popBackStack()
-        else -> navigate(route = destination, navOptions = navOptions)
     }
 }
 

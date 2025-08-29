@@ -14,9 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
-import com.tsaha.navigation.OnNavigateTo
-import com.tsaha.navigation.ToBack
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
@@ -35,23 +34,23 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun PlanetDetailsScreen(
     planetId: String,
+    navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: PlanetDetailViewModel = koinViewModel { parametersOf(planetId) },
-    onNavigate: OnNavigateTo,
+    vm: PlanetDetailViewModel = koinViewModel { parametersOf(planetId) },
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by vm.uiState.collectAsStateWithLifecycle()
     PlanetDetailsComposable(
         state = state,
-        modifier = modifier,
-        onNavigate = onNavigate
+        onClickBack = { navController.popBackStack() },
+        modifier = modifier
     )
 }
 
 @Composable
 private fun PlanetDetailsComposable(
     state: PlanetDetailsUiState,
-    modifier: Modifier = Modifier,
-    onNavigate: OnNavigateTo,
+    onClickBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -59,7 +58,7 @@ private fun PlanetDetailsComposable(
             NucleusAppBar(
                 title = stringResource(id = R.string.feature_planetdetail_title),
                 isBackVisible = true,
-                onBack = { onNavigate(ToBack) {} }
+                onBack = onClickBack
             )
         },
     ) { padding ->
@@ -123,7 +122,7 @@ private fun PlanetDetailScreenPreview() {
                     terrain = "Desert"
                 )
             ),
-            onNavigate = { _, _ -> }
+            onClickBack = {},
         )
     }
 }

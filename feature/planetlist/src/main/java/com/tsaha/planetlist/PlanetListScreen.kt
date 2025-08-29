@@ -10,15 +10,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.tsaha.feature.planetlist.R
-import com.tsaha.navigation.NavigableGraph.PlanetDetailsNavigable
-import com.tsaha.navigation.OnNavigateTo
+import com.tsaha.navigation.Route
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
@@ -40,23 +41,33 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PlanetListScreen(
+    navController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: PlanetListViewModel = koinViewModel(),
-    onNavigate: OnNavigateTo,
+    vm: PlanetListViewModel = koinViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by vm.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        vm.navEvent.collect { event ->
+            when (event) {
+                is NavEvent.ToPlanetDetails ->
+                    navController.navigate(Route.PlanetDetails.create(event.uid))
+            }
+        }
+    }
+
     PlanetListComposable(
         state = state,
-        modifier = modifier,
-        onNavigate = onNavigate
+        onClickPlanet = { vm.onClickPlanet(it) },
+        modifier = modifier
     )
 }
 
 @Composable
 private fun PlanetListComposable(
     state: PlanetListUiState,
-    modifier: Modifier = Modifier,
-    onNavigate: OnNavigateTo,
+    onClickPlanet: (Planet) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
@@ -90,7 +101,7 @@ private fun PlanetListComposable(
                                 )
                             },
                             subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
-                            onClick = { onNavigate(PlanetDetailsNavigable(planetId = item.planet.uid)) {} }
+                            onClick = { onClickPlanet(item.planet) }
                         )
                     }
                 }
@@ -157,7 +168,7 @@ private fun PlanetListComposableLoadingPreview() {
     NucleusTheme {
         PlanetListComposable(
             state = ListLoading,
-            onNavigate = { _, _ -> }
+            onClickPlanet = {}
         )
     }
 }
@@ -168,7 +179,7 @@ private fun PlanetListComposableErrorPreview() {
     NucleusTheme {
         PlanetListComposable(
             state = ListError(),
-            onNavigate = { _, _ -> }
+            onClickPlanet = {}
         )
     }
 }
@@ -206,7 +217,7 @@ private fun PlanetListComposableSuccessPreview() {
                     )
                 )
             ),
-            onNavigate = { _, _ -> }
+            onClickPlanet = {}
         )
     }
 }
