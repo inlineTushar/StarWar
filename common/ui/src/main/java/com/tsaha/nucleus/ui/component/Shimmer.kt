@@ -5,6 +5,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,8 +20,20 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
-fun Modifier.shimmer(): Modifier = composed {
+@Composable
+fun ShimmerComposable(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .width(Random.nextInt(70, 120).dp)
+            .height(14.dp)
+            .shimmer()
+    )
+}
+
+private fun Modifier.shimmer(): Modifier = composed {
     var size by remember {
         mutableStateOf(IntSize.Zero)
     }

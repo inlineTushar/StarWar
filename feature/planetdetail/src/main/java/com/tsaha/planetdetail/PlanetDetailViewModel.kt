@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,8 +16,8 @@ class PlanetDetailViewModel(
     private val planetRepository: PlanetRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<PlanetDetailsUiState>(DetailsLoading)
-    val uiState: StateFlow<PlanetDetailsUiState> = _uiState.asStateFlow()
+    private val uiStateMutable = MutableStateFlow<PlanetDetailsUiState>(DetailsLoading)
+    val uiState: StateFlow<PlanetDetailsUiState> = uiStateMutable.asStateFlow()
 
     suspend fun getPlanetDetail(planetId: String) {
         channelFlow {
@@ -28,10 +27,9 @@ class PlanetDetailViewModel(
                 send(PlanetDetailsUiState.DetailsSuccess(cache))
             } else {
                 planetRepository.getPlanet(planetId)
-                    .onSuccess { planetRepository.cache[planetId] = it }
                     .onSuccess { planet -> send(PlanetDetailsUiState.DetailsSuccess(planet)) }
                     .onFailure { send(PlanetDetailsUiState.DetailsError(it.message)) }
             }
-        }.onEach { _uiState.value = it }.stateIn(viewModelScope)
+        }.onEach { uiStateMutable.value = it }.stateIn(viewModelScope)
     }
 }

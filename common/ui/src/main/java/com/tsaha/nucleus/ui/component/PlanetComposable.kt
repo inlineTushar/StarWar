@@ -3,6 +3,7 @@ package com.tsaha.nucleus.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ fun PlanetComposable(
 fun PlanetNameComposable(name: String, modifier: Modifier = Modifier) {
     Text(
         text = name,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.headlineLarge
     )
 }

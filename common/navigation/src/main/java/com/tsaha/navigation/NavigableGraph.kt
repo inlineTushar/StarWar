@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 sealed class NavigableGraph : Navigable {
     @Serializable
-    data object PlanetList : NavigableGraph()
+    data object PlanetListNavigable : NavigableGraph()
     @Serializable
-    data class PlanetDetails(
+    data class PlanetDetailsNavigable(
         val planetId: String,
     ) : NavigableGraph()
 }

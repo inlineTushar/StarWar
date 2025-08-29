@@ -10,22 +10,23 @@ import androidx.navigation.navOptions
 import com.tsaha.navigation.Navigable
 import com.tsaha.navigation.NavigableGraph
 import com.tsaha.navigation.ToBack
-import com.tsaha.planetdetail.PlanetDetailScreen
 import com.tsaha.planetlist.PlanetListScreen
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.toRoute
+import com.tsaha.navigation.NavigableGraph.*
 import com.tsaha.nucleus.ui.theme.NucleusTheme
+import com.tsaha.planetdetail.PlanetDetailsScreen
 
 @Composable
 internal fun MainNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: NavigableGraph = NavigableGraph.PlanetList,
+    startDestination: NavigableGraph = PlanetListNavigable,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable<NavigableGraph.PlanetList> {
+        composable<PlanetListNavigable> {
             PlanetListScreen(
                 onNavigate = { destination, optionBuilder ->
                     navController.navigateTo(
@@ -36,9 +37,9 @@ internal fun MainNavGraph(
             )
         }
 
-        composable<NavigableGraph.PlanetDetails> { backStackEntry ->
-            val planetDetails = backStackEntry.toRoute<NavigableGraph.PlanetDetails>()
-            PlanetDetailScreen(
+        composable<PlanetDetailsNavigable> { backStackEntry ->
+            val planetDetails = backStackEntry.toRoute<PlanetDetailsNavigable>()
+            PlanetDetailsScreen(
                 planetId = planetDetails.planetId
             ) { destination, optionBuilder ->
                 navController.navigateTo(
