@@ -7,6 +7,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun PlanetComposable(
@@ -30,6 +32,8 @@ fun PlanetNameComposable(
     Text(
         text = name,
         modifier = modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.headlineLarge
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.headlineMedium
     )
 }

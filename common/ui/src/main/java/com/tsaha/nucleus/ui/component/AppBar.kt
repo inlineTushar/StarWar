@@ -31,8 +31,8 @@ fun NucleusAppBar(
             title = {
                 Text(
                     text = title,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.Monospace
                 )
             },
             navigationIcon = {
@@ -51,7 +51,13 @@ fun NucleusAppBar(
         )
     } else {
         TopAppBar(
-            title = { Text(text = title) },
+            title = {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.Monospace
+                )
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = backgroundColor,
                 titleContentColor = contentColor

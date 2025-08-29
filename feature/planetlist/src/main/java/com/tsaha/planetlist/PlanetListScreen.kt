@@ -92,14 +92,7 @@ private fun PlanetListComposable(
                         key = { it.planet.uid },
                     ) { item ->
                         PlanetComposable(
-                            headlineContent = {
-                                PlanetNameComposable(
-                                    name = stringResource(
-                                        com.tsaha.nucleus.ui.R.string.common_ui_planet_name,
-                                        item.planet.name
-                                    )
-                                )
-                            },
+                            headlineContent = { PlanetNameComposable(name = item.planet.name) },
                             subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
                             onClick = { onClickPlanet(item.planet) }
                         )

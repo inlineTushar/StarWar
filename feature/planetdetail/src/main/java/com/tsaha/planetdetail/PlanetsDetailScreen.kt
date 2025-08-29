@@ -39,6 +39,7 @@ fun PlanetDetailsScreen(
     vm: PlanetDetailViewModel = koinViewModel { parametersOf(planetId) },
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
+
     PlanetDetailsComposable(
         state = state,
         onClickBack = { navController.popBackStack() },
@@ -74,14 +75,7 @@ private fun PlanetDetailsComposable(
 
             is DetailsSuccess -> {
                 PlanetComposable(
-                    headlineContent = {
-                        PlanetNameComposable(
-                            name = stringResource(
-                                string.common_ui_planet_name,
-                                current.details.name
-                            )
-                        )
-                    },
+                    headlineContent = { PlanetNameComposable(name = current.details.name) },
                     subHeadingContent = { PlanetInfoComposable(planet = current.details) },
                     modifier = Modifier.padding(padding),
                 )
@@ -96,7 +90,9 @@ private fun PlanetInfoComposable(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.headlineMedium) {
+        CompositionLocalProvider(
+            LocalTextStyle provides MaterialTheme.typography.headlineMedium,
+        ) {
             Text(text = stringResource(string.common_ui_planet_climate, planet.climate))
             Text(text = stringResource(string.common_ui_planet_population, planet.population))
             Text(text = stringResource(string.common_ui_planet_diameter, planet.diameter))
