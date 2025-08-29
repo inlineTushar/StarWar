@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -39,38 +38,33 @@ class PlanetListUiUseCase(
             return@channelFlow
         }
 
-        val indexById = planets.mapIndexed { i, p -> p.uid to i }.toMap()
-
         val currentItems = planets.map { planet ->
             PlanetItem(
                 planet = planet,
-                detailsState = planetRepository.cache[planet.uid]?.let { DetailsSuccess(it) }
-                    ?: DetailsLoading
+                detailsState = DetailsLoading
             )
         }.toMutableList()
 
         send(ListSuccess(currentItems.toList()))
 
-        val planetIds = planets.map { it.uid }
+        val indexById = planets.mapIndexed { idx, p -> p.uid to idx }.toMap()
 
-        planetIds.asFlow()
-            .filter { it !in planetRepository.cache } // skip already in cache
-            .flatMapMerge(concurrency = concurrency) { id ->
+        planets.asFlow()
+            .flatMapMerge(concurrency = concurrency) { planet ->
                 flow {
                     val detailsState =
-                        planetRepository.getPlanet(id).getOrNull()
+                        planetRepository.getPlanet(planet.uid).getOrNull()
                             ?.let { DetailsSuccess(it) }
                             ?: DetailsError()
-                    emit(id to detailsState)
+                    emit(planet to detailsState)
                 }
             }
-            .collect { (id, detailsState) ->
-                if (detailsState is DetailsSuccess) {
-                    planetRepository.cache[id] = detailsState.details
-                }
-                indexById[id]?.let { idx ->
-                    currentItems[idx] = currentItems[idx].copy(detailsState = detailsState)
-                    send(ListSuccess(currentItems.toList()))
+            .collect { (planet, detailsState) ->
+                indexById[planet.uid]?.let { idx ->
+                    if (currentItems[idx].detailsState is DetailsLoading) {
+                        currentItems[idx] = currentItems[idx].copy(detailsState = detailsState)
+                        send(ListSuccess(currentItems.toList()))
+                    }
                 }
             }
     }.flowOn(Dispatchers.IO)

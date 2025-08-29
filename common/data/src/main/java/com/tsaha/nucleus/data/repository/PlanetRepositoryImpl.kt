@@ -14,8 +14,6 @@ class PlanetRepositoryImpl(
     private val planetApi: PlanetApi
 ) : PlanetRepository {
 
-    override val cache: MutableMap<String, PlanetDetails> = mutableMapOf()
-
     override suspend fun getPlanetsWithPagination(
         pageNumber: Int,
         limit: Int
@@ -38,7 +36,7 @@ class PlanetRepositoryImpl(
     override suspend fun getPlanet(id: String): Result<PlanetDetails> {
         return try {
             require(id.isNotBlank()) { "Planet ID cannot be blank" }
-            planetApi.getPlanet(id).onSuccess { cache[id] = it }
+            planetApi.getPlanet(id)
         } catch (e: IllegalArgumentException) {
             Result.failure(e)
         } catch (e: Exception) {

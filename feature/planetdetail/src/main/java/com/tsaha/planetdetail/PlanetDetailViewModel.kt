@@ -29,14 +29,10 @@ class PlanetDetailViewModel(
 
     suspend fun getPlanetDetail(planetId: String) {
         channelFlow {
-            val cache = planetRepository.cache[planetId]
-            if (cache != null) {
-                send(PlanetDetailsUiState.DetailsSuccess(cache))
-            } else {
-                planetRepository.getPlanet(planetId)
-                    .onSuccess { planet -> send(PlanetDetailsUiState.DetailsSuccess(planet)) }
-                    .onFailure { send(PlanetDetailsUiState.DetailsError(it.message)) }
-            }
-        }.onEach { uiStateMutable.value = it }.stateIn(viewModelScope)
+            planetRepository.getPlanet(planetId)
+                .onSuccess { planet -> send(PlanetDetailsUiState.DetailsSuccess(planet)) }
+                .onFailure { send(PlanetDetailsUiState.DetailsError(it.message)) }
+        }.onEach { uiStateMutable.value = it }
+            .stateIn(viewModelScope)
     }
 }
