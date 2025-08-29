@@ -15,12 +15,13 @@ fun PlanetComposable(
     headlineContent: @Composable () -> Unit,
     subHeadingContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    label: String,
     onClick: () -> Unit = {},
 ) {
     ListItem(
         headlineContent = headlineContent,
         supportingContent = subHeadingContent,
-        modifier = modifier.clickable { onClick() },
+        modifier = modifier.clickable(onClickLabel = label) { onClick() },
     )
 }
 

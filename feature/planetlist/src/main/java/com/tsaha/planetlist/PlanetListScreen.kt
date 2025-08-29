@@ -38,6 +38,7 @@ import com.tsaha.planetlist.model.PlanetListUiState.ListError
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
 import com.tsaha.planetlist.model.PlanetListUiState.ListSuccess
 import org.koin.androidx.compose.koinViewModel
+import com.tsaha.nucleus.ui.R as CommonR
 
 @Composable
 fun PlanetListScreen(
@@ -94,7 +95,8 @@ private fun PlanetListComposable(
                         PlanetComposable(
                             headlineContent = { PlanetNameComposable(name = item.planet.name) },
                             subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
-                            onClick = { onClickPlanet(item.planet) }
+                            onClick = { onClickPlanet(item.planet) },
+                            label = stringResource(CommonR.string.common_ui_accessibility_planet_item, item.planet.name)
                         )
                     }
                 }
@@ -124,14 +126,14 @@ private fun PlanetInfoComposable(
             is DetailsSuccess -> {
                 Text(
                     text = stringResource(
-                        com.tsaha.nucleus.ui.R.string.common_ui_planet_climate,
+                        CommonR.string.common_ui_planet_climate,
                         planetDetailsUiState.details.climate
                     ),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
                     text = stringResource(
-                        com.tsaha.nucleus.ui.R.string.common_ui_planet_population,
+                        CommonR.string.common_ui_planet_population,
                         planetDetailsUiState.details.population
                     ),
                     style = MaterialTheme.typography.headlineMedium
@@ -150,7 +152,8 @@ private fun PlanetListItemPreview() {
         PlanetComposable(
             headlineContent = { Text(text = "Earth") },
             subHeadingContent = { PlanetInfoComposable(DetailsLoading) },
-            onClick = {}
+            onClick = {},
+            label = stringResource(CommonR.string.common_ui_accessibility_planet_item, "Earth")
         )
     }
 }

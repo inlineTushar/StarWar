@@ -21,7 +21,6 @@ import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
-import com.tsaha.nucleus.ui.R.string
 import com.tsaha.nucleus.ui.component.ErrorComposable
 import com.tsaha.nucleus.ui.component.NucleusAppBar
 import com.tsaha.nucleus.ui.component.PlanetComposable
@@ -30,6 +29,7 @@ import com.tsaha.nucleus.ui.component.ProgressBarComposable
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.tsaha.nucleus.ui.R as CommonR
 
 @Composable
 fun PlanetDetailsScreen(
@@ -77,6 +77,10 @@ private fun PlanetDetailsComposable(
                 PlanetComposable(
                     headlineContent = { PlanetNameComposable(name = current.details.name) },
                     subHeadingContent = { PlanetInfoComposable(planet = current.details) },
+                    label = stringResource(
+                        CommonR.string.common_ui_accessibility_planet_details,
+                        current.details.name
+                    ),
                     modifier = Modifier.padding(padding),
                 )
             }
@@ -93,11 +97,11 @@ private fun PlanetInfoComposable(
         CompositionLocalProvider(
             LocalTextStyle provides MaterialTheme.typography.headlineMedium,
         ) {
-            Text(text = stringResource(string.common_ui_planet_climate, planet.climate))
-            Text(text = stringResource(string.common_ui_planet_population, planet.population))
-            Text(text = stringResource(string.common_ui_planet_diameter, planet.diameter))
-            Text(text = stringResource(string.common_ui_planet_gravity, planet.gravity))
-            Text(text = stringResource(string.common_ui_planet_terrain, planet.terrain))
+            Text(text = stringResource(CommonR.string.common_ui_planet_climate, planet.climate))
+            Text(text = stringResource(CommonR.string.common_ui_planet_population, planet.population))
+            Text(text = stringResource(CommonR.string.common_ui_planet_diameter, planet.diameter))
+            Text(text = stringResource(CommonR.string.common_ui_planet_gravity, planet.gravity))
+            Text(text = stringResource(CommonR.string.common_ui_planet_terrain, planet.terrain))
         }
     }
 }

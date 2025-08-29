@@ -5,4 +5,13 @@
     <string name="common_ui_planet_diameter">Diameter: %s</string>
     <string name="common_ui_planet_gravity">Gravity: %s</string>
     <string name="common_ui_planet_terrain">Terrain: %s</string>
+    <!-- Accessibility strings -->
+    <string name="common_ui_planet_appbar">AppBar</string>
+    <string name="common_ui_planet_name">Planet: %s</string>
+    <string name="common_ui_accessibility_back_button">Navigate back</string>
+    <string name="common_ui_accessibility_planet_item">Planet %s, tap to view details</string>
+    <string name="common_ui_accessibility_loading">Loading content, please wait</string>
+    <string name="common_ui_accessibility_error_occurred">Error occurred</string>
+    <string name="common_ui_accessibility_planet_details">Planet details for %s</string>
+    <string name="common_ui_accessibility_planet_information">Planet information including climate, population, diameter, gravity, and terrain</string>
 </resources>
