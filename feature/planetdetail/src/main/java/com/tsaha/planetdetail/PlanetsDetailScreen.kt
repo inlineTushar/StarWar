@@ -9,7 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,17 +30,15 @@ import com.tsaha.nucleus.ui.component.PlanetNameComposable
 import com.tsaha.nucleus.ui.component.ProgressBarComposable
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun PlanetDetailsScreen(
     planetId: String,
     modifier: Modifier = Modifier,
-    viewModel: PlanetDetailViewModel = koinViewModel(),
+    viewModel: PlanetDetailViewModel = koinViewModel { parametersOf(planetId) },
     onNavigate: OnNavigateTo,
 ) {
-    LaunchedEffect(planetId) {
-        viewModel.getPlanetDetail(planetId)
-    }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     PlanetDetailsComposable(
         state = state,
