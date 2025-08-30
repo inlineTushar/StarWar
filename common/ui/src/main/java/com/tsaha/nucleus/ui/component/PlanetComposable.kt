@@ -1,6 +1,5 @@
 package com.tsaha.nucleus.ui.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +20,7 @@ fun PlanetComposable(
     ListItem(
         headlineContent = headlineContent,
         supportingContent = subHeadingContent,
-        modifier = modifier.clickable(onClickLabel = label) { onClick() },
+        modifier = modifier.debouncedClickable(onClickLabel = label) { onClick() },
     )
 }
 
