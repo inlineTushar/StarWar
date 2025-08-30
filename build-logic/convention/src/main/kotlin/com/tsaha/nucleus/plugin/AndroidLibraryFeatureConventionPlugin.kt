@@ -46,8 +46,10 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 "testImplementation"(libs.findLibrary("koin.test").get())
                 "testImplementation"(libs.findLibrary("koin.test.junit4").get())
 
-                // Keep JUnit4 for legacy tests
+                // Keep JUnit4 for legacy tests and add AssertK for modern assertions
                 "testImplementation"(libs.findLibrary("junit").get())
+                "testImplementation"(libs.findLibrary("assertk").get())
+                "testImplementation"(project(":common:core"))
             }
         }
     }

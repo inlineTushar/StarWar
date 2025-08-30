@@ -6,3 +6,4 @@ plugins {
 android {
     namespace = "com.tsaha.feature.planetdetail"
 }
+

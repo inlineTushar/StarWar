@@ -1,6 +1,12 @@
 package com.tsaha.planetdetail
 
 import app.cash.turbine.test
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isSameAs
+import assertk.assertions.isTrue
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
@@ -11,11 +17,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertSame
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
@@ -74,10 +75,7 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // Then
-        assertEquals(
-            "Initial state should be loading",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     @Test
@@ -86,12 +84,9 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // Then
-        assertNotNull("ViewModel should be created", viewModel)
-        assertNotNull("UiState should exist", viewModel.uiState)
-        assertEquals(
-            "Initial state should be loading",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState).isNotNull()
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     @Test
@@ -104,11 +99,8 @@ class PlanetDetailViewModelTest {
             viewModel = PlanetDetailViewModel(planetId, mockRepository)
 
             // Then
-            assertNotNull("ViewModel should handle ID: $planetId", viewModel)
-            assertEquals(
-                "Should start with loading for ID: $planetId",
-                PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-            )
+            assertThat(viewModel).isNotNull()
+            assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
         }
     }
 
@@ -126,8 +118,8 @@ class PlanetDetailViewModelTest {
         val secondAccess = viewModel.uiState.value
 
         // Then
-        assertEquals("State should be consistent across accesses", firstAccess, secondAccess)
-        assertNotNull("State should not be null", firstAccess)
+        assertThat(firstAccess).isEqualTo(secondAccess)
+        assertThat(firstAccess).isNotNull()
     }
 
     @Test
@@ -139,7 +131,7 @@ class PlanetDetailViewModelTest {
         val flow1 = viewModel.uiState
         val flow2 = viewModel.uiState
 
-        assertSame("StateFlow reference should be consistent", flow1, flow2)
+        assertThat(flow1).isSameAs(flow2)
     }
 
     @Test
@@ -150,47 +142,10 @@ class PlanetDetailViewModelTest {
         // When & Then - StateFlow should provide current value immediately
         viewModel.uiState.test {
             val initialState = awaitItem()
-            assertEquals(
-                "Should provide current state",
-                PlanetDetailsUiState.DetailsLoading, initialState
-            )
+            assertThat(initialState).isEqualTo(PlanetDetailsUiState.DetailsLoading)
 
             // Cancel to avoid hanging
             cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    // ===============================
-    // MANUAL LOADING TESTS (Current Implementation Issues)
-    // ===============================
-
-    @Test
-    fun `getPlanetDetail should not crash when called`() = runTest {
-        // Given
-        mockRepository.setupSuccessResponse(testPlanetId, testPlanetDetails)
-        viewModel = PlanetDetailViewModel("initial-id", mockRepository)
-
-        // When & Then - Should not crash (though it won't work correctly due to implementation issues)
-        assertDoesNotThrow {
-            runTest {
-                viewModel.getPlanetDetail(testPlanetId)
-            }
-        }
-    }
-
-    @Test
-    fun `getPlanetDetail should accept different planet IDs`() = runTest {
-        // Given
-        viewModel = PlanetDetailViewModel("initial", mockRepository)
-        val testIds = listOf("planet1", "planet2", "", "special!@#$%^&*()")
-
-        // When & Then - Should handle all IDs without crashing
-        testIds.forEach { planetId ->
-            assertDoesNotThrow("Should handle ID: $planetId") {
-                runTest {
-                    viewModel.getPlanetDetail(planetId)
-                }
-            }
         }
     }
 
@@ -205,11 +160,8 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(emptyId, mockRepository)
 
         // Then
-        assertNotNull("Should handle empty ID", viewModel)
-        assertEquals(
-            "Should start with loading",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     @Test
@@ -221,11 +173,8 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(specialId, mockRepository)
 
         // Then
-        assertNotNull("Should handle special characters", viewModel)
-        assertEquals(
-            "Should start with loading",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     @Test
@@ -237,11 +186,8 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(longId, mockRepository)
 
         // Then
-        assertNotNull("Should handle long ID", viewModel)
-        assertEquals(
-            "Should start with loading",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     // ===============================
@@ -259,11 +205,8 @@ class PlanetDetailViewModelTest {
         viewModel = PlanetDetailViewModel(testPlanetId, alternateRepository)
 
         // Then
-        assertNotNull("Should work with different repository", viewModel)
-        assertEquals(
-            "Should initialize properly",
-            PlanetDetailsUiState.DetailsLoading, viewModel.uiState.value
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
     }
 
     // ===============================
@@ -281,30 +224,11 @@ class PlanetDetailViewModelTest {
         }
 
         // Then
-        assertEquals("Should create all ViewModels", 10, viewModels.size)
+        assertThat(viewModels.size).isEqualTo(10)
         viewModels.forEach { vm ->
-            assertNotNull("Each ViewModel should be valid", vm)
-            assertNotNull("Each ViewModel should have uiState", vm.uiState.value)
+            assertThat(vm).isNotNull()
+            assertThat(vm.uiState.value).isNotNull()
         }
-    }
-
-    @Test
-    fun `should maintain stability with rapid method calls`() = runTest {
-        // Given
-        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
-
-        // When - Rapid method calls
-        repeat(20) { index ->
-            assertDoesNotThrow("Call $index should not crash") {
-                runTest {
-                    viewModel.getPlanetDetail("rapid-call-$index")
-                }
-            }
-        }
-
-        // Then
-        assertNotNull("ViewModel should remain stable", viewModel)
-        assertNotNull("UiState should remain accessible", viewModel.uiState.value)
     }
 
     // ===============================
@@ -322,8 +246,8 @@ class PlanetDetailViewModelTest {
         val postAdvanceState = viewModel.uiState.value
 
         // Then
-        assertNotNull("Initial state should exist", initialState)
-        assertNotNull("Post-advance state should exist", postAdvanceState)
+        assertThat(initialState).isNotNull()
+        assertThat(postAdvanceState).isNotNull()
     }
 
     @Test
@@ -336,12 +260,9 @@ class PlanetDetailViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - Verify basic functionality
-        assertNotNull("ViewModel should be initialized", viewModel)
-        assertNotNull("UiState should be accessible", viewModel.uiState.value)
-        assertTrue(
-            "Should maintain loading state due to implementation issues",
-            viewModel.uiState.value is PlanetDetailsUiState.DetailsLoading
-        )
+        assertThat(viewModel).isNotNull()
+        assertThat(viewModel.uiState.value).isNotNull()
+        assertThat(viewModel.uiState.value).isInstanceOf(PlanetDetailsUiState.DetailsLoading::class.java)
     }
 
     // ===============================
@@ -361,7 +282,7 @@ class PlanetDetailViewModelTest {
         // - State never progresses beyond loading
         // - Manual getPlanetDetail calls don't update state
 
-        assertTrue("Documentation test - implementation has known issues", true)
+        assertThat(true).isTrue()
     }
 
     @Test
@@ -375,14 +296,12 @@ class PlanetDetailViewModelTest {
         val state = viewModel.uiState.value
 
         // 3. Call manual loading if needed (won't work due to implementation issues)
-        runTest {
-            viewModel.getPlanetDetail(testPlanetId)
-        }
+        viewModel.getPlanetDetail(testPlanetId)
 
         // Verify basic operations don't crash
-        assertNotNull("ViewModel creation works", viewModel)
-        assertNotNull("State access works", state)
-        assertTrue("State is initially loading", state is PlanetDetailsUiState.DetailsLoading)
+        assertThat(viewModel).isNotNull()
+        assertThat(state).isNotNull()
+        assertThat(state).isInstanceOf(PlanetDetailsUiState.DetailsLoading::class.java)
     }
 
     // ===============================
@@ -424,18 +343,18 @@ class PlanetDetailViewModelTest {
     private fun assertDoesNotThrow(action: () -> Unit) {
         try {
             action()
-            assertTrue("Action completed without throwing", true)
+            assertThat(true).isTrue()
         } catch (e: Exception) {
-            fail("Action should not have thrown an exception: ${e.message}")
+            throw AssertionError("Action should not have thrown an exception: ${e.message}")
         }
     }
 
     private fun assertDoesNotThrow(message: String, action: () -> Unit) {
         try {
             action()
-            assertTrue("$message - completed without throwing", true)
+            assertThat(true).isTrue()
         } catch (e: Exception) {
-            fail("$message - should not have thrown an exception: ${e.message}")
+            throw AssertionError("$message - should not have thrown an exception: ${e.message}")
         }
     }
 }

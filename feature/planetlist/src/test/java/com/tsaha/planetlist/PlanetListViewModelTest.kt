@@ -1,6 +1,11 @@
 package com.tsaha.planetlist
 
 import app.cash.turbine.test
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEqualTo
+import assertk.assertions.isNotNull
+import assertk.assertions.isTrue
 import com.tsaha.nucleus.data.model.Pagination
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
@@ -13,10 +18,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -60,12 +61,8 @@ class PlanetListViewModelTest {
             viewModel.onClickPlanet(testPlanet)
 
             val event = awaitItem()
-            assertTrue("Event should be ToPlanetDetails", event is NavEvent.ToPlanetDetails)
-            assertEquals(
-                "Event should have correct UID",
-                testPlanet.uid,
-                (event as NavEvent.ToPlanetDetails).uid
-            )
+            assertThat(event is NavEvent.ToPlanetDetails).isTrue()
+            assertThat((event as NavEvent.ToPlanetDetails).uid).isEqualTo(testPlanet.uid)
 
             ensureAllEventsConsumed()
         }
@@ -82,11 +79,8 @@ class PlanetListViewModelTest {
                 viewModel.onClickPlanet(planet)
 
                 val event = awaitItem()
-                assertTrue("Event should be ToPlanetDetails", event is NavEvent.ToPlanetDetails)
-                assertEquals(
-                    "Event should have correct UID for ${planet.name}",
-                    planet.uid, (event as NavEvent.ToPlanetDetails).uid
-                )
+                assertThat(event is NavEvent.ToPlanetDetails).isTrue()
+                assertThat((event as NavEvent.ToPlanetDetails).uid).isEqualTo(planet.uid)
             }
 
             ensureAllEventsConsumed()
@@ -104,13 +98,13 @@ class PlanetListViewModelTest {
 
             // Should receive all events in order
             val event1 = awaitItem()
-            assertEquals("First event UID", "1", (event1 as NavEvent.ToPlanetDetails).uid)
+            assertThat((event1 as NavEvent.ToPlanetDetails).uid).isEqualTo("1")
 
             val event2 = awaitItem()
-            assertEquals("Second event UID", "2", (event2 as NavEvent.ToPlanetDetails).uid)
+            assertThat((event2 as NavEvent.ToPlanetDetails).uid).isEqualTo("2")
 
             val event3 = awaitItem()
-            assertEquals("Third event UID", "1", (event3 as NavEvent.ToPlanetDetails).uid)
+            assertThat((event3 as NavEvent.ToPlanetDetails).uid).isEqualTo("1")
 
             ensureAllEventsConsumed()
         }
@@ -135,7 +129,7 @@ class PlanetListViewModelTest {
             viewModel.onClickPlanet(planetWithEmptyId)
 
             val event = awaitItem()
-            assertEquals("Should handle empty UID", "", (event as NavEvent.ToPlanetDetails).uid)
+            assertThat((event as NavEvent.ToPlanetDetails).uid).isEqualTo("")
 
             ensureAllEventsConsumed()
         }
@@ -151,10 +145,7 @@ class PlanetListViewModelTest {
                 viewModel.onClickPlanet(planet)
 
                 val event = awaitItem()
-                assertEquals(
-                    "Event $index should have correct UID",
-                    index.toString(), (event as NavEvent.ToPlanetDetails).uid
-                )
+                assertThat((event as NavEvent.ToPlanetDetails).uid).isEqualTo(index.toString())
             }
 
             ensureAllEventsConsumed()
@@ -171,10 +162,7 @@ class PlanetListViewModelTest {
         val initialState = viewModel.uiState.value
 
         // Then
-        assertTrue(
-            "Initial state should be ListLoading",
-            initialState is PlanetListUiState.ListLoading
-        )
+        assertThat(initialState is PlanetListUiState.ListLoading).isTrue()
     }
 
     // ===============================
@@ -190,11 +178,11 @@ class PlanetListViewModelTest {
         val navEvent: NavEvent = NavEvent.ToPlanetDetails(sampleUID)
 
         // Then
-        assertTrue("NavEvent should be assignable to sealed interface", navEvent is NavEvent)
+        assertThat(navEvent is NavEvent).isTrue()
 
         when (navEvent) {
             is NavEvent.ToPlanetDetails -> {
-                assertEquals("Should match the UID", sampleUID, navEvent.uid)
+                assertThat(navEvent.uid).isEqualTo(sampleUID)
             }
         }
     }
@@ -215,8 +203,8 @@ class PlanetListViewModelTest {
         edgeCaseUIDs.forEach { uid ->
             val navEvent = NavEvent.ToPlanetDetails(uid)
 
-            assertNotNull("NavEvent should not be null", navEvent)
-            assertEquals("Should preserve even edge case UIDs", uid, navEvent.uid)
+            assertThat(navEvent).isNotNull()
+            assertThat(navEvent.uid).isEqualTo(uid)
         }
     }
 
@@ -226,10 +214,10 @@ class PlanetListViewModelTest {
         val planet = Planet(uid = "test-uid", name = "Test Planet")
 
         // When & Then
-        assertNotNull("Planet should have UID", planet.uid)
-        assertNotNull("Planet should have name", planet.name)
-        assertEquals("UID should match", "test-uid", planet.uid)
-        assertEquals("Name should match", "Test Planet", planet.name)
+        assertThat(planet.uid).isNotNull()
+        assertThat(planet.name).isNotNull()
+        assertThat(planet.uid).isEqualTo("test-uid")
+        assertThat(planet.name).isEqualTo("Test Planet")
     }
 
     @Test
@@ -243,12 +231,9 @@ class PlanetListViewModelTest {
         val navEvent3 = NavEvent.ToPlanetDetails("different-uid")
 
         // Then
-        assertEquals("Same UIDs should create equal events", navEvent1, navEvent2)
-        assertNotEquals("Different UIDs should create different events", navEvent1, navEvent3)
-        assertEquals(
-            "Hash codes should be equal for same UIDs",
-            navEvent1.hashCode(), navEvent2.hashCode()
-        )
+        assertThat(navEvent1).isEqualTo(navEvent2)
+        assertThat(navEvent1).isNotEqualTo(navEvent3)
+        assertThat(navEvent1.hashCode()).isEqualTo(navEvent2.hashCode())
     }
 
     // ===============================

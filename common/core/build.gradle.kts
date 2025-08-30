@@ -42,6 +42,7 @@ dependencies {
 
     // Testing dependencies
     testImplementation(libs.junit)
+    api(libs.assertk)
     testImplementation(libs.androidx.lifecycle.viewmodel.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.koin.test.junit4)

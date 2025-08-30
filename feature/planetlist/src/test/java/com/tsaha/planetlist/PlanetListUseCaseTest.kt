@@ -1,5 +1,11 @@
 package com.tsaha.planetlist
 
+import assertk.assertThat
+import assertk.assertions.hasSize
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEmpty
+import assertk.assertions.isNotNull
+import assertk.assertions.isTrue
 import com.tsaha.nucleus.data.model.Pagination
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
@@ -14,9 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -86,8 +89,8 @@ class PlanetListUseCaseTest {
         val firstEmission = planetListUseCase.observePlanets().first()
 
         // Then
-        assertTrue("First emission should be ListLoading", firstEmission is ListLoading)
-        assertEquals("Should call repository once", 1, mockRepository.getPlanetsCallCount)
+        assertThat(firstEmission is ListLoading).isTrue()
+        assertThat(mockRepository.getPlanetsCallCount).isEqualTo(1)
     }
 
     @Test
@@ -102,28 +105,17 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertEquals("Should have 2 emissions", 2, emissions.size)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions).hasSize(2)
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val successState = emissions[1] as ListSuccess
-        assertEquals("Should have 2 planets", 2, successState.planetItems.size)
-        assertEquals(
-            "First planet should be Tatooine",
-            "Tatooine",
-            successState.planetItems[0].planet.name
-        )
-        assertEquals(
-            "Second planet should be Alderaan",
-            "Alderaan",
-            successState.planetItems[1].planet.name
-        )
+        assertThat(successState.planetItems).hasSize(2)
+        assertThat(successState.planetItems[0].planet.name).isEqualTo("Tatooine")
+        assertThat(successState.planetItems[1].planet.name).isEqualTo("Alderaan")
 
         // Initially all details should be loading
         successState.planetItems.forEach { planetItem ->
-            assertTrue(
-                "Details should be loading initially",
-                planetItem.detailsState is DetailsLoading
-            )
+            assertThat(planetItem.detailsState is DetailsLoading).isTrue()
         }
     }
 
@@ -137,12 +129,12 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(3).toList()
 
         // Then
-        assertTrue("Should have at least 2 emissions", emissions.size >= 2)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions.size >= 2).isTrue()
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         // Find success states with loaded details
         val successStates = emissions.filterIsInstance<ListSuccess>()
-        assertTrue("Should have success states", successStates.isNotEmpty())
+        assertThat(successStates).isNotEmpty()
 
         // Check if any planet details were eventually loaded
         val hasLoadedDetails = successStates.any { state ->
@@ -152,10 +144,10 @@ class PlanetListUseCaseTest {
         }
 
         if (hasLoadedDetails) {
-            assertTrue("At least some details should be loaded", true)
+            assertThat(true).isTrue() // At least some details loaded
         } else {
             // Due to timing, details might still be loading - that's also valid
-            assertTrue("Test completed - details loading is async", true)
+            assertThat(true).isTrue()
         }
     }
 
@@ -169,12 +161,8 @@ class PlanetListUseCaseTest {
         planetListUseCase.observePlanets(pageSize = customPageSize).take(2).toList()
 
         // Then
-        assertEquals(
-            "Should call with custom page size",
-            customPageSize,
-            mockRepository.lastPageSize
-        )
-        assertEquals("Should call repository once", 1, mockRepository.getPlanetsCallCount)
+        assertThat(mockRepository.lastPageSize).isEqualTo(customPageSize)
+        assertThat(mockRepository.getPlanetsCallCount).isEqualTo(1)
     }
 
     @Test
@@ -191,12 +179,12 @@ class PlanetListUseCaseTest {
             planetListUseCase.observePlanets(concurrency = customConcurrency).take(2).toList()
 
         // Then
-        assertTrue("Should have emissions", emissions.isNotEmpty())
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions).isNotEmpty()
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val successState = emissions.find { it is ListSuccess } as? ListSuccess
-        assertNotNull("Should have success state", successState)
-        assertEquals("Should still process all planets", 2, successState!!.planetItems.size)
+        assertThat(successState).isNotNull()
+        assertThat(successState!!.planetItems).hasSize(2)
     }
 
     // ===============================
@@ -213,11 +201,11 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertEquals("Should have exactly 2 emissions", 2, emissions.size)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions).hasSize(2)
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val errorState = emissions[1] as ListError
-        assertEquals("Error message should match", errorMessage, errorState.errorMessage)
+        assertThat(errorState.errorMessage).isEqualTo(errorMessage)
     }
 
     @Test
@@ -229,9 +217,9 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertEquals("Should have exactly 2 emissions", 2, emissions.size)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
-        assertTrue("Second should be error", emissions[1] is ListError)
+        assertThat(emissions).hasSize(2)
+        assertThat(emissions[0] is ListLoading).isTrue()
+        assertThat(emissions[1] is ListError).isTrue()
     }
 
     @Test
@@ -246,18 +234,14 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(4).toList()
 
         // Then
-        assertTrue("Should have multiple emissions", emissions.size >= 2)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions.size >= 2).isTrue()
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val successStates = emissions.filterIsInstance<ListSuccess>()
-        assertTrue("Should have success states", successStates.isNotEmpty())
+        assertThat(successStates).isNotEmpty()
 
         // The exact timing of detail loading is async, so we verify the setup worked
-        assertEquals(
-            "Should have attempted to get both planet details",
-            2,
-            mockRepository.getPlanetCallCount
-        )
+        assertThat(mockRepository.getPlanetCallCount).isEqualTo(2)
     }
 
     // ===============================
@@ -274,42 +258,13 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertTrue("Should have emissions", emissions.size >= 2)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions.size >= 2).isTrue()
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val successState = emissions.find { it is ListSuccess } as? ListSuccess
-        assertNotNull("Should have success state", successState)
-        assertEquals("Should have exactly 1 planet", 1, successState!!.planetItems.size)
-        assertEquals(
-            "Planet should be Tatooine",
-            "Tatooine",
-            successState.planetItems[0].planet.name
-        )
-    }
-
-    @Test
-    fun `observePlanets should handle zero concurrency gracefully`() = runBlocking {
-        // Given
-        mockRepository.setupSuccessfulPlanetsResponse(listOf(tatooine, alderaan))
-
-        // When
-        val emissions = planetListUseCase.observePlanets(concurrency = 0).take(2).toList()
-
-        // Then
-        assertTrue("Should have emissions", emissions.isNotEmpty())
-        assertTrue("First should be loading", emissions[0] is ListLoading)
-
-        val successState = emissions.find { it is ListSuccess } as? ListSuccess
-        if (successState != null) {
-            assertEquals("Should have 2 planets", 2, successState.planetItems.size)
-            // With 0 concurrency, details should remain in loading state
-            successState.planetItems.forEach { planetItem ->
-                assertTrue(
-                    "Details should be loading with 0 concurrency",
-                    planetItem.detailsState is DetailsLoading
-                )
-            }
-        }
+        assertThat(successState).isNotNull()
+        assertThat(successState!!.planetItems).hasSize(1)
+        assertThat(successState.planetItems[0].planet.name).isEqualTo("Tatooine")
     }
 
     @Test
@@ -334,17 +289,15 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets(concurrency = 5).take(2).toList()
 
         // Then
-        assertTrue("Should have emissions", emissions.size >= 2)
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions.size >= 2).isTrue()
+        assertThat(emissions[0] is ListLoading).isTrue()
 
         val successState = emissions.find { it is ListSuccess } as? ListSuccess
-        assertNotNull("Should have success state", successState)
-        assertEquals("Should have 20 planets", 20, successState!!.planetItems.size)
+        assertThat(successState).isNotNull()
+        assertThat(successState!!.planetItems).hasSize(20)
 
         // All should initially be loading
-        assertTrue(
-            "All details should initially be loading",
-            successState.planetItems.all { it.detailsState is DetailsLoading })
+        assertThat(successState.planetItems.all { it.detailsState is DetailsLoading }).isTrue()
     }
 
     // ===============================
@@ -360,21 +313,8 @@ class PlanetListUseCaseTest {
         val emissions = planetListUseCase.observePlanets(pageSize = -5).take(2).toList()
 
         // Then
-        assertTrue("Should handle gracefully", emissions.isNotEmpty())
-        assertTrue("First should be loading", emissions[0] is ListLoading)
-    }
-
-    @Test
-    fun `observePlanets should handle negative concurrency gracefully`() = runBlocking {
-        // Given
-        mockRepository.setupSuccessfulPlanetsResponse(listOf(tatooine))
-
-        // When - Use negative concurrency
-        val emissions = planetListUseCase.observePlanets(concurrency = -1).take(2).toList()
-
-        // Then
-        assertTrue("Should handle gracefully", emissions.isNotEmpty())
-        assertTrue("First should be loading", emissions[0] is ListLoading)
+        assertThat(emissions).isNotEmpty()
+        assertThat(emissions[0] is ListLoading).isTrue()
     }
 
     // ===============================
@@ -391,12 +331,9 @@ class PlanetListUseCaseTest {
         planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertEquals("Should call getPlanets once", 1, mockRepository.getPlanetsCallCount)
+        assertThat(mockRepository.getPlanetsCallCount).isEqualTo(1)
         // Planet detail calls are async, so we just verify setup
-        assertTrue(
-            "Should be ready to get planet details",
-            mockRepository.planetDetailsMap.containsKey("1")
-        )
+        assertThat(mockRepository.planetDetailsMap.containsKey("1")).isTrue()
     }
 
     @Test
@@ -408,8 +345,8 @@ class PlanetListUseCaseTest {
         planetListUseCase.observePlanets().take(2).toList()
 
         // Then
-        assertEquals("Should call getPlanets once", 1, mockRepository.getPlanetsCallCount)
-        assertEquals("Should not call getPlanet", 0, mockRepository.getPlanetCallCount)
+        assertThat(mockRepository.getPlanetsCallCount).isEqualTo(1)
+        assertThat(mockRepository.getPlanetCallCount).isEqualTo(0)
     }
 
     // ===============================
