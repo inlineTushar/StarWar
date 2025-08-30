@@ -16,9 +16,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transformLatest
 
 class PlanetListUseCase(
     private val planetRepository: PlanetRepository
@@ -26,16 +30,16 @@ class PlanetListUseCase(
     fun observePlanets(
         concurrency: Int = CONCURRENT_REQUESTS,
         pageSize: Int = PAGE_SIZE
-    ): Flow<PlanetListUiState> = channelFlow {
-        send(ListLoading)
+    ): Flow<PlanetListUiState> = flow {
+        emit(ListLoading)
 
         val planetsResult = planetRepository.getPlanetsWithPagination(pageSize)
         val planets: List<Planet> = planetsResult.getOrNull()?.second.orEmpty()
 
         if (planets.isEmpty()) {
             val msg = planetsResult.exceptionOrNull()?.message
-            send(ListError(msg))
-            return@channelFlow
+            emit(ListError(msg))
+            return@flow
         }
 
         val currentItems = planets.map { planet ->
@@ -45,9 +49,9 @@ class PlanetListUseCase(
             )
         }.toMutableList()
 
-        send(ListSuccess(currentItems.toList()))
+        emit(ListSuccess(currentItems.toList()))
 
-        val indexById = planets.mapIndexed { idx, p -> p.uid to idx }.toMap()
+        val indexByPlanetId = planets.mapIndexed { idx, planet -> planet.uid to idx }.toMap()
 
         planets.asFlow()
             .flatMapMerge(concurrency = concurrency) { planet ->
@@ -60,10 +64,10 @@ class PlanetListUseCase(
                 }
             }
             .collect { (planet, planetDetails) ->
-                indexById[planet.uid]?.let { idx ->
+                indexByPlanetId[planet.uid]?.let { idx ->
                     if (currentItems[idx].detailsState is DetailsLoading) {
                         currentItems[idx] = currentItems[idx].copy(detailsState = planetDetails)
-                        send(ListSuccess(currentItems.toList()))
+                        emit(ListSuccess(currentItems.toList()))
                     }
                 }
             }
