@@ -158,25 +158,24 @@ API Call → Basic Planet List → Immediate UI Display
 ```
 Concurrent API Calls → Planet Details → Progressive UI Updates
 ```
-
 - Loads detailed planet information concurrently
 - Updates UI progressively as each planet's details arrive
-- Uses configurable concurrency
+- Uses default concurrency from Kotlin coroutines (16 concurrent requests)
 - Handles errors gracefully without blocking other planets
 
 ### 💡 Implementation Details
 
 ```kotlin
 // PlanetListUseCase - Two-phase loading implementation
-fun observePlanets(concurrency: Int = 3, pageSize: Int = 10): Flow<PlanetListUiState> = flow {
+fun observePlanets(pageSize: Int = 10): Flow<PlanetListUiState> = flow {
     emit(ListLoading)                              // Phase 0: Loading state
     
     val planets = planetRepository.getPlanetsWithPagination(pageSize)
     emit(ListSuccess(planets.asLoadingItems()))    // Phase 1: Quick display
     
     planets.asFlow()
-        .flatMapMerge(concurrency = concurrency) { planet ->
-            // Phase 2: Progressive enhancement
+        .flatMapMerge { planet ->
+            // Phase 2: Progressive enhancement (uses DEFAULT_CONCURRENCY = 16)
             planetRepository.getPlanet(planet.uid)
         }
         .collect { planetDetails ->
@@ -189,7 +188,7 @@ fun observePlanets(concurrency: Int = 3, pageSize: Int = 10): Flow<PlanetListUiS
 
 - **⚡ Fast Initial Load**: Users see content within milliseconds
 - **📈 Progressive Enhancement**: Details appear as they're loaded
-- **🚦 Optimized Network**: Concurrent but controlled API requests
+- **🚦 Optimized Network**: Concurrent API requests with Kotlin coroutines default (16)
 - **💪 Resilient**: Individual planet failures don't affect others
 
 ## 🧪 Testing Coverage

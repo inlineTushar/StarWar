@@ -1,6 +1,5 @@
 package com.tsaha.planetlist
 
-import com.tsaha.nucleus.core.network.CONCURRENT_REQUESTS
 import com.tsaha.nucleus.core.network.PAGE_SIZE
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.repository.PlanetRepository
@@ -27,10 +26,7 @@ import kotlinx.coroutines.flow.transformLatest
 class PlanetListUseCase(
     private val planetRepository: PlanetRepository
 ) {
-    fun observePlanets(
-        concurrency: Int = CONCURRENT_REQUESTS,
-        pageSize: Int = PAGE_SIZE
-    ): Flow<PlanetListUiState> = flow {
+    fun observePlanets(pageSize: Int = PAGE_SIZE): Flow<PlanetListUiState> = flow {
         emit(ListLoading)
 
         val planetsResult = planetRepository.getPlanetsWithPagination(pageSize)
@@ -54,7 +50,7 @@ class PlanetListUseCase(
         val indexByPlanetId = planets.mapIndexed { idx, planet -> planet.uid to idx }.toMap()
 
         planets.asFlow()
-            .flatMapMerge(concurrency = concurrency) { planet ->
+            .flatMapMerge { planet ->
                 flow {
                     val planetDetails =
                         planetRepository.getPlanet(planet.uid).getOrNull()

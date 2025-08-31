@@ -166,17 +166,15 @@ class PlanetListUseCaseTest {
     }
 
     @Test
-    fun `observePlanets should respect custom concurrency parameter`() = runBlocking {
+    fun `observePlanets should use default concurrency from flatMapMerge`() = runBlocking {
         // Given
-        val customConcurrency = 1
         val planets = listOf(tatooine, alderaan)
         mockRepository.setupSuccessfulPlanetsResponse(planets)
         mockRepository.setupSuccessfulPlanetDetail("1", tatooineDetails)
         mockRepository.setupSuccessfulPlanetDetail("2", alderaanDetails)
 
         // When
-        val emissions =
-            planetListUseCase.observePlanets(concurrency = customConcurrency).take(2).toList()
+        val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
         assertThat(emissions).isNotEmpty()
@@ -286,7 +284,7 @@ class PlanetListUseCaseTest {
         }
 
         // When
-        val emissions = planetListUseCase.observePlanets(concurrency = 5).take(2).toList()
+        val emissions = planetListUseCase.observePlanets().take(2).toList()
 
         // Then
         assertThat(emissions.size >= 2).isTrue()
