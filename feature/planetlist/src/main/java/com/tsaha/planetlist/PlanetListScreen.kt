@@ -1,11 +1,14 @@
 package com.tsaha.planetlist
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +34,7 @@ import com.tsaha.nucleus.ui.component.NucleusAppBar
 import com.tsaha.nucleus.ui.component.PlanetComposable
 import com.tsaha.nucleus.ui.component.PlanetNameComposable
 import com.tsaha.nucleus.ui.component.ProgressBarComposable
+import com.tsaha.nucleus.ui.component.SearchBar
 import com.tsaha.nucleus.ui.component.ShimmerComposable
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem
@@ -38,6 +42,7 @@ import com.tsaha.planetlist.model.PlanetListUiState
 import com.tsaha.planetlist.model.PlanetListUiState.ListError
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
 import com.tsaha.planetlist.model.PlanetListUiState.ListSuccess
+import com.tsaha.planetlist.model.PlanetListUiState.SearchResult
 import org.koin.androidx.compose.koinViewModel
 import com.tsaha.nucleus.ui.R as CommonR
 
@@ -48,6 +53,9 @@ fun PlanetListScreen(
     vm: PlanetListViewModel = koinViewModel(),
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val searchQuery by vm.searchQuery.collectAsStateWithLifecycle()
+    val isSearchMode by vm.isSearchMode.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         vm.navEvent.collect { event ->
@@ -58,18 +66,32 @@ fun PlanetListScreen(
         }
     }
 
+    LoadMoreComposable(
+        loadMoreEnable = { state is ListSuccess && !isSearchMode },
+        onNext = vm::onRequestInitialOrNextPage,
+        listState = listState
+    )
+
     PlanetListComposable(
         state = state,
+        searchQuery = searchQuery,
+        onSearchQueryChanged = vm::onSearchQueryChanged,
+        onClearSearch = vm::clearSearch,
         onClickPlanet = { vm.onClickPlanet(it) },
-        modifier = modifier
+        listState = listState,
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun PlanetListComposable(
     state: PlanetListUiState,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    onClearSearch: () -> Unit,
     onClickPlanet: (Planet) -> Unit,
-    modifier: Modifier = Modifier
+    listState: LazyListState,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
@@ -80,33 +102,83 @@ private fun PlanetListComposable(
             )
         }
     ) { padding ->
-        when (val current = state) {
-            ListLoading -> ProgressBarComposable(modifier = Modifier.padding(padding))
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
+            // Search Bar
+            SearchBar(
+                query = searchQuery,
+                onQueryChanged = onSearchQueryChanged,
+                onClearQuery = onClearSearch,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
 
-            is ListSuccess ->
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize()
-                ) {
-                    items(
-                        items = current.planetItems,
-                        key = { it.planet.uid },
-                    ) { item ->
-                        PlanetComposable(
-                            headlineContent = { PlanetNameComposable(name = item.planet.name) },
-                            subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
-                            onClick = { onClickPlanet(item.planet) },
-                            label = stringResource(CommonR.string.common_ui_accessibility_planet_item, item.planet.name)
-                        )
+            // Content
+            when (val current = state) {
+                ListLoading -> ProgressBarComposable()
+
+                is ListSuccess -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(state = listState) {
+                            items(
+                                items = current.planetItems,
+                                key = { it.planet.uid },
+                            ) { item ->
+                                PlanetComposable(
+                                    headlineContent = { PlanetNameComposable(name = item.planet.name) },
+                                    subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
+                                    onClick = { onClickPlanet(item.planet) },
+                                    label = stringResource(
+                                        CommonR.string.common_ui_accessibility_planet_item,
+                                        item.planet.name
+                                    )
+                                )
+                            }
+                        }
+
+                        if (current.isPageLoading) {
+                            ProgressBarComposable()
+                        }
                     }
                 }
 
-            is ListError ->
-                ErrorComposable(
-                    errorText = stringResource(R.string.feature_planetlist_loading_error),
-                    modifier = Modifier.padding(padding)
-                )
+                is SearchResult -> {
+                    if (current.isSearching) {
+                        ProgressBarComposable()
+                    } else if (current.planetItems.isEmpty() && current.searchQuery.isNotBlank()) {
+                        ErrorComposable(
+                            errorText = stringResource(
+                                R.string.feature_planetlist_search_no_results,
+                                current.searchQuery
+                            )
+                        )
+                    } else {
+                        LazyColumn {
+                            items(
+                                items = current.planetItems,
+                                key = { it.planet.uid },
+                            ) { item ->
+                                PlanetComposable(
+                                    headlineContent = { PlanetNameComposable(name = item.planet.name) },
+                                    subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
+                                    onClick = { onClickPlanet(item.planet) },
+                                    label = stringResource(
+                                        CommonR.string.common_ui_accessibility_planet_item,
+                                        item.planet.name
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is ListError ->
+                    ErrorComposable(
+                        errorText = stringResource(R.string.feature_planetlist_loading_error)
+                    )
+            }
         }
     }
 }
@@ -159,7 +231,11 @@ private fun PlanetListComposableLoadingPreview() {
     NucleusTheme {
         PlanetListComposable(
             state = ListLoading,
-            onClickPlanet = {}
+            searchQuery = "",
+            onSearchQueryChanged = {},
+            onClearSearch = {},
+            onClickPlanet = {},
+            listState = rememberLazyListState()
         )
     }
 }
@@ -170,7 +246,11 @@ private fun PlanetListComposableErrorPreview() {
     NucleusTheme {
         PlanetListComposable(
             state = ListError(),
-            onClickPlanet = {}
+            searchQuery = "",
+            onSearchQueryChanged = {},
+            onClearSearch = {},
+            onClickPlanet = {},
+            listState = rememberLazyListState()
         )
     }
 }
@@ -208,7 +288,47 @@ private fun PlanetListComposableSuccessPreview() {
                     )
                 )
             ),
-            onClickPlanet = {}
+            searchQuery = "",
+            onSearchQueryChanged = {},
+            onClearSearch = {},
+            onClickPlanet = {},
+            listState = rememberLazyListState()
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlanetListComposableSearchPreview() {
+    NucleusTheme {
+        PlanetListComposable(
+            state = SearchResult(
+                planetItems = listOf(
+                    PlanetItem(
+                        planet = Planet(
+                            uid = "1",
+                            name = "Tatooine"
+                        ),
+                        detailsState = DetailsSuccess(
+                            details = PlanetDetails(
+                                uid = "1",
+                                name = "Tatooine",
+                                climate = "Arid",
+                                population = "200000",
+                                diameter = "10465",
+                                gravity = "1 standard",
+                                terrain = "Desert"
+                            )
+                        )
+                    )
+                ),
+                searchQuery = "Tatooine"
+            ),
+            searchQuery = "Tatooine",
+            onSearchQueryChanged = {},
+            onClearSearch = {},
+            onClickPlanet = {},
+            listState = rememberLazyListState()
         )
     }
 }

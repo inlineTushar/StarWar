@@ -35,4 +35,11 @@ interface PlanetRepository {
      * @return Result containing PlanetDetail with detailed information
      */
     suspend fun getPlanet(id: String): Result<PlanetDetails>
+
+    /**
+     * Searches for planets by name using the local data source
+     * @param query The search query to filter planet names
+     * @return Result containing list of matching planets with details
+     */
+    suspend fun searchPlanets(query: String): Result<List<PlanetDetails>>
 }

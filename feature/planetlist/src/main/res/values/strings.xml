@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_planetlist_title">Planets</string>
-    <string name="feature_planetlist_loading_error">Planets couldn\'t be reached! \nTry again later!</string>
+    <string name="feature_planetlist_title">Star Wars Planets</string>
+    <string name="feature_planetlist_loading_error">Failed to load planets. Please try again.</string>
+    <string name="feature_planetlist_search_no_results">No planets found for "%s"</string>
 </resources>

@@ -5,6 +5,7 @@
     <string name="common_ui_planet_diameter">Diameter</string>
     <string name="common_ui_planet_gravity">Gravity</string>
     <string name="common_ui_planet_terrain">Terrain</string>
+    <string name="common_ui_search_placeholder">Search planets...</string>
     <!-- Accessibility strings -->
     <string name="common_ui_planet_appbar">AppBar</string>
     <string name="common_ui_planet_name">Planet: %s</string>

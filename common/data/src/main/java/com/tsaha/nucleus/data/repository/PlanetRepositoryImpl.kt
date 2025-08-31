@@ -53,4 +53,19 @@ class PlanetRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun searchPlanets(query: String): Result<List<PlanetDetails>> {
+        return try {
+            require(query.isNotBlank()) { "Search query cannot be blank" }
+            val allPlanets = planetDataSource.getAllPlanets()
+            val filteredPlanets = allPlanets.filter { planet ->
+                planet.name.contains(query, ignoreCase = true)
+            }
+            Result.success(filteredPlanets)
+        } catch (e: IllegalArgumentException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
