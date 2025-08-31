@@ -17,7 +17,6 @@ class AndroidAppConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
-            apply(plugin = "local.android.lint")
 
             extensions.configure<ApplicationExtension> {
                 configureAppKotlinAndroid(this)

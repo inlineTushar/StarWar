@@ -15,14 +15,11 @@ dependencies {
     api(libs.androidx.lifecycle.viewmodel.compose)
     api(libs.androidx.lifecycle.runtime.compose)
     api(libs.androidx.lifecycle.viewmodel.savedstate)
-    api(libs.androidx.lifecycle.livedata.ktx)
-    api(libs.androidx.lifecycle.common.java8)
 
     // Koin - Dependency Injection
     api(libs.koin.core)
     api(libs.koin.android)
     api(libs.koin.android.compat)
-    api(libs.koin.androidx.navigation)
     api(libs.koin.androidx.compose)
 
     // Ktor - Networking

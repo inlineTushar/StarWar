@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.android.lint)
 }
 
 group = "com.tsaha.nucleus.buildlogic"
@@ -22,10 +21,8 @@ kotlin {
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    lintChecks(libs.androidx.lint.gradle)
 }
 
 tasks {
@@ -52,10 +49,6 @@ gradlePlugin {
         register("androidFeature") {
             id = libs.plugins.local.android.feature.get().pluginId
             implementationClass = "com.tsaha.nucleus.plugin.AndroidLibraryFeatureConventionPlugin"
-        }
-        register("androidLint") {
-            id = libs.plugins.local.android.lint.get().pluginId
-            implementationClass = "com.tsaha.nucleus.plugin.AndroidLintConventionPlugin"
         }
     }
 }
