@@ -12,7 +12,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
@@ -23,6 +32,7 @@ import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
 import com.tsaha.nucleus.ui.component.ErrorComposable
 import com.tsaha.nucleus.ui.component.NucleusAppBar
+import androidx.compose.foundation.layout.height
 import com.tsaha.nucleus.ui.component.PlanetComposable
 import com.tsaha.nucleus.ui.component.PlanetNameComposable
 import com.tsaha.nucleus.ui.component.ProgressBarComposable
@@ -75,8 +85,18 @@ private fun PlanetDetailsComposable(
 
             is DetailsSuccess -> {
                 PlanetComposable(
-                    headlineContent = { PlanetNameComposable(name = current.details.name) },
-                    subHeadingContent = { PlanetInfoComposable(planet = current.details) },
+                    headlineContent = {
+                        PlanetNameComposable(
+                            name = current.details.name,
+                            stylable = true
+                        )
+                    },
+                    subHeadingContent = {
+                        PlanetInfoComposable(
+                            planet = current.details,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                    },
                     label = stringResource(
                         CommonR.string.common_ui_accessibility_planet_details,
                         current.details.name
@@ -95,15 +115,64 @@ private fun PlanetInfoComposable(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         CompositionLocalProvider(
-            LocalTextStyle provides MaterialTheme.typography.headlineMedium,
+            LocalTextStyle provides MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp),
         ) {
-            Text(text = stringResource(CommonR.string.common_ui_planet_climate, planet.climate))
-            Text(text = stringResource(CommonR.string.common_ui_planet_population, planet.population))
-            Text(text = stringResource(CommonR.string.common_ui_planet_diameter, planet.diameter))
-            Text(text = stringResource(CommonR.string.common_ui_planet_gravity, planet.gravity))
-            Text(text = stringResource(CommonR.string.common_ui_planet_terrain, planet.terrain))
+            PlanetInfoUnitComposable(
+                title = stringResource(CommonR.string.common_ui_planet_climate),
+                value = planet.climate
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PlanetInfoUnitComposable(
+                title = stringResource(CommonR.string.common_ui_planet_population),
+                value = planet.population
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PlanetInfoUnitComposable(
+                title = stringResource(CommonR.string.common_ui_planet_diameter),
+                value = planet.diameter
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PlanetInfoUnitComposable(
+                title = stringResource(CommonR.string.common_ui_planet_gravity),
+                value = planet.gravity
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PlanetInfoUnitComposable(
+                title = stringResource(CommonR.string.common_ui_planet_terrain),
+                value = planet.terrain
+            )
         }
     }
+}
+
+@Composable
+fun PlanetInfoUnitComposable(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        buildAnnotatedString {
+            withStyle(
+                style = ParagraphStyle(lineHeight = 28.sp)
+            ) {
+                withStyle(SpanStyle(fontWeight = FontWeight.Thin)) {
+                    append("$title:\n")
+                }
+                withStyle(SpanStyle(fontWeight = FontWeight.Medium, letterSpacing = 5.sp)) {
+                    append(value)
+                }
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)

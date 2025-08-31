@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -125,18 +126,12 @@ private fun PlanetInfoComposable(
 
             is DetailsSuccess -> {
                 Text(
-                    text = stringResource(
-                        CommonR.string.common_ui_planet_climate,
-                        planetDetailsUiState.details.climate
-                    ),
-                    style = MaterialTheme.typography.headlineMedium
+                    text = planetDetailsUiState.details.climate,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontStyle = FontStyle.Italic)
                 )
                 Text(
-                    text = stringResource(
-                        CommonR.string.common_ui_planet_population,
-                        planetDetailsUiState.details.population
-                    ),
-                    style = MaterialTheme.typography.headlineMedium
+                    text = planetDetailsUiState.details.population,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontStyle = FontStyle.Italic)
                 )
             }
 
