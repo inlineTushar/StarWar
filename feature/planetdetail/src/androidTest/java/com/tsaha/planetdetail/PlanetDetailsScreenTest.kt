@@ -68,8 +68,11 @@ class PlanetDetailsScreenTest {
 
         // Then - Planet details should be displayed
         composeTestRule.onNodeWithText("Tatooine").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Climate: Arid").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Population: 200,000").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Climate:\nArid", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Population:\n200,000", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Diameter:\n10,465 km", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Gravity:\n1 standard", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Terrain:\nDesert", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -157,7 +160,13 @@ class PlanetDetailsScreenTest {
 
         // Then - Shows planet details
         composeTestRule.onNodeWithText("Alderaan").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Climate: Temperate").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Climate:\nTemperate", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Population:\n2 billion", substring = true)
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Diameter:\n12,500 km", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Gravity:\n1 standard", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Terrain:\nGrasslands, mountains", substring = true)
+            .assertIsDisplayed()
     }
 
     @Test
@@ -192,8 +201,12 @@ class PlanetDetailsScreenTest {
 
         // Then - All planet details should be displayed
         composeTestRule.onNodeWithText("Coruscant").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Population: 1 trillion").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Terrain: Cityscape").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Climate:\nTemperate", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Population:\n1 trillion", substring = true)
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Diameter:\n12,240 km", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Gravity:\n1 standard", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Terrain:\nCityscape", substring = true).assertIsDisplayed()
     }
 
     @Test

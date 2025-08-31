@@ -99,6 +99,29 @@ class PlanetComposableTest {
     }
 
     @Test
+    fun planetComposable_withNullOnClick_doesNotCrash() {
+        // Given
+        val planetName = "Hoth"
+
+        // When
+        composeTestRule.setContent {
+            NucleusTheme {
+                PlanetComposable(
+                    headlineContent = { PlanetNameComposable(name = planetName) },
+                    subHeadingContent = { Text("Ice planet") },
+                    onClick = null,
+                    label = "Planet $planetName"
+                )
+            }
+        }
+
+        // Then
+        composeTestRule.onNodeWithText(planetName).assertIsDisplayed()
+        // Should not crash when clicked even with null onClick
+        composeTestRule.onNodeWithText(planetName).performClick()
+    }
+
+    @Test
     fun planetComposable_withDifferentPlanetNames_displaysCorrectly() {
         // Given - Test one representative planet name
         val planetName = "Tatooine"
@@ -195,6 +218,38 @@ class PlanetComposableTest {
         composeTestRule.setContent {
             NucleusTheme {
                 PlanetNameComposable(name = planetName)
+            }
+        }
+
+        // Then
+        composeTestRule.onNodeWithText(planetName).assertIsDisplayed()
+    }
+
+    @Test
+    fun planetNameComposable_withStylableTrue_displaysWithStyling() {
+        // Given
+        val planetName = "Jupiter"
+
+        // When
+        composeTestRule.setContent {
+            NucleusTheme {
+                PlanetNameComposable(name = planetName, stylable = true)
+            }
+        }
+
+        // Then
+        composeTestRule.onNodeWithText(planetName).assertIsDisplayed()
+    }
+
+    @Test
+    fun planetNameComposable_withStylableFalse_displaysWithDefaultStyling() {
+        // Given
+        val planetName = "Saturn"
+
+        // When
+        composeTestRule.setContent {
+            NucleusTheme {
+                PlanetNameComposable(name = planetName, stylable = false)
             }
         }
 

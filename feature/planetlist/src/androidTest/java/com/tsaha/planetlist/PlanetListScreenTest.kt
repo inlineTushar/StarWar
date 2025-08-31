@@ -254,6 +254,10 @@ class PlanetListScreenTest {
         composeTestRule.onNodeWithText("Loading Planet").assertIsDisplayed()
         composeTestRule.onNodeWithText("Success Planet").assertIsDisplayed()
         composeTestRule.onNodeWithText("Error Planet").assertIsDisplayed()
+
+        // Check that the success planet shows its climate and population
+        composeTestRule.onNodeWithText("Temperate").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1000000").assertIsDisplayed()
     }
 
     @Test
