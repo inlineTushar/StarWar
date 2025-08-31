@@ -93,11 +93,21 @@ private fun Project.configureAppSpecifics(appExtension: ApplicationExtension) {
     appExtension.apply {
         buildTypes {
             release {
-                isMinifyEnabled = false
+                isMinifyEnabled = true
+                isShrinkResources = true
                 proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
                 )
+                isDebuggable = false
+            }
+            debug {
+                isMinifyEnabled = false
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android.txt"),
+                    "proguard-rules.pro"
+                )
+                isDebuggable = true
             }
         }
     }

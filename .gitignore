@@ -52,6 +52,10 @@ local.properties
 .gradle/
 build/
 
+# App module specific build outputs
+app/debug/
+app/release/
+
 # Android Studio files
 .navigation/
 captures/
