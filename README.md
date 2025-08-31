@@ -1,8 +1,33 @@
-# 🪐 Nucleus - Star Wars Planets Explorer
+# 🪐 Star Wars Planets Explorer
 
 A modern Android application showcasing **Clean Architecture**, **Modular Design**, and *
 *Squad-Based Development** practices. This app displays Star Wars planets with detailed information,
 featuring a sophisticated two-phase data loading strategy and comprehensive testing coverage.
+
+## 📸 Preview
+
+<table align="center">
+<tr>
+<td align="center">
+<h3>Planet List Screen</h3>
+<img src="./screenshot/Screen%231.png" width="300" alt="Planet List Screen"/>
+<br>
+<em>Two-phase loading with shimmer effects</em>
+</td>
+<td align="center">
+<h3>Planet Detail Screen</h3>
+<img src="./screenshot/Screen%232.png" width="300" alt="Planet Detail Screen"/>
+<br>
+<em>Gradient styling and comprehensive planet info</em>
+</td>
+</tr>
+</table>
+
+<p align="center"><strong>Modern Material 3 design with progressive loading and accessibility support</strong></p>
+
+> 📂 **Screenshots Location**: [`screenshot/`](./screenshot/) directory  
+> 🖼️ **Files**: `Screen#1.png` (Planet List) • `Screen#2.png` (Planet Details)  
+> 💡 **Tip**: If images don't load, check your markdown viewer's support for relative paths
 
 ## 📱 Features
 
@@ -290,10 +315,84 @@ cd Nucleus
 ./gradlew test connectedAndroidTest
 ```
 
-### Build Variants
+## 🏗️ Build Configuration
 
-- **Debug**: `com.tsaha.nucleus.starwars.debug`
-- **Release**: `com.tsaha.nucleus.starwars.release`
+### 📦 **Build Variants**
+
+The project supports two build variants with different configurations:
+
+| Variant     | Application ID                       | Signing          | Use Case              |
+|-------------|--------------------------------------|------------------|-----------------------|
+| **Debug**   | `com.tsaha.nucleus.starwars.debug`   | Debug keystore   | Development, testing  |
+| **Release** | `com.tsaha.nucleus.starwars.release` | Release keystore | Production deployment |
+
+### 🔐 **Keystore Management**
+
+#### **Debug Build** 🛠️
+
+- **Keystore**: `keystore/debug.keystore.jks` (included in repository)
+- **Credentials**: Hardcoded for development convenience
+- **Usage**: No additional setup required
+
+```bash
+# Build debug APK
+./gradlew assembleDebug
+
+# Install debug version
+./gradlew installDebug
+```
+
+#### **Release Build** 🚀
+
+- **Keystore**: `keystore/release.keystore.jks` (included in repository)
+- **Credentials**: **Not included** for security reasons
+- **Setup Required**: Contact developer for release signing credentials
+
+##### **Release Build Setup**
+
+1. **Contact Developer** 📞
+  - Request release signing credentials from the project maintainer
+  - You'll receive: `keyAlias`, `keyPassword`, and `storePassword`
+
+2. **Configure Local Credentials** 🔑
+   Create or update `~/.gradle/gradle.properties`:
+   ```properties
+   # Release signing configuration
+   STAR_RELEASE_KEY_ALIAS=your_key_alias
+   STAR_RELEASE_KEY_PASSWORD=your_key_password  
+   STAR_RELEASE_STORE_PASSWORD=your_store_password
+   ```
+
+3. **Build Release APK** 📦
+   ```bash
+   # Build release APK
+   ./gradlew assembleRelease
+   
+   # Install release version
+   ./gradlew installRelease
+   ```
+
+##### **Security Notes** 🔒
+
+- ✅ **Keystore files**: Included in repository (encrypted)
+- ❌ **Passwords**: Never committed to version control
+- 🏠 **Credentials**: Stored in user's local `gradle.properties`
+- 🔐 **Production**: Release builds require valid signing credentials
+
+##### **Troubleshooting** 🛠️
+
+```bash
+# If release build fails with credential errors:
+# 1. Verify gradle.properties exists: ~/.gradle/gradle.properties
+# 2. Check property names match exactly:
+#    - STAR_RELEASE_KEY_ALIAS
+#    - STAR_RELEASE_KEY_PASSWORD  
+#    - STAR_RELEASE_STORE_PASSWORD
+# 3. Contact developer for correct values
+
+# Build with debug signing for testing
+./gradlew assembleDebug  # Always works
+```
 
 ## 📦 Project Structure
 
@@ -407,7 +506,7 @@ Centralized dependency management in `gradle/libs.versions.toml`:
 ```
         🔺 UI Tests (58 tests)
        /                    \
-      /   Integration Tests   \
+      /   Integration Tests  \
      /________________________\
     /                          \
    /      Unit Tests (51 tests)  \
