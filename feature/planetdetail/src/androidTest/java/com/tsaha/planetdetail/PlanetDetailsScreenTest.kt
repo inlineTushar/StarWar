@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
 import assertk.assertions.isTrue
+import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
@@ -42,8 +43,7 @@ class PlanetDetailsScreenTest {
         // Given - Mock ViewModel with success state
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
         val testPlanetDetails = PlanetDetails(
-            uid = "1",
-            name = "Tatooine",
+            planet = Planet(uid = "1", name = "Tatooine"),
             climate = "Arid",
             population = "200,000",
             diameter = "10,465 km",
@@ -148,8 +148,7 @@ class PlanetDetailsScreenTest {
 
         // When - Change to success state
         val planetDetails = PlanetDetails(
-            uid = "2",
-            name = "Alderaan",
+            planet = Planet(uid = "2", name = "Alderaan"),
             climate = "Temperate",
             population = "2 billion",
             diameter = "12,500 km",
@@ -174,8 +173,7 @@ class PlanetDetailsScreenTest {
         // Given - Different planet data
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
         val planetDetails = PlanetDetails(
-            uid = "3",
-            name = "Coruscant",
+            planet = Planet(uid = "3", name = "Coruscant"),
             climate = "Temperate",
             population = "1 trillion",
             diameter = "12,240 km",
@@ -214,8 +212,7 @@ class PlanetDetailsScreenTest {
         // Given
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
         val planetDetails = PlanetDetails(
-            uid = "nav-test",
-            name = "Navigation Test Planet",
+            planet = Planet(uid = "nav-test", name = "Navigation Test Planet"),
             climate = "Test Climate",
             population = "Test Population",
             diameter = "Test Diameter",
@@ -252,8 +249,7 @@ class PlanetDetailsScreenTest {
         // Given - Mock ViewModel with success state
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
         val planetDetails = PlanetDetails(
-            uid = "back-test",
-            name = "Back Test Planet",
+            planet = Planet(uid = "back-test", name = "Back Test Planet"),
             climate = "Test",
             population = "Test",
             diameter = "Test",
@@ -288,8 +284,10 @@ class PlanetDetailsScreenTest {
         // Given - Planet with long data values
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
         val planetDetails = PlanetDetails(
-            uid = "long-data-test",
-            name = "Very Long Planet Name That Should Be Displayed Properly",
+            planet = Planet(
+                uid = "long-data-test",
+                name = "Very Long Planet Name That Should Be Displayed Properly"
+            ),
             climate = "Very complex climate with multiple atmospheric conditions and variations",
             population = "A very large population number: 999,999,999,999 inhabitants",
             diameter = "Extremely large diameter measurement: 999,999.99 kilometers",

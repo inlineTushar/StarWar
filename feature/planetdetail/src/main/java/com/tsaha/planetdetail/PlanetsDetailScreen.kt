@@ -25,6 +25,7 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
+import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
@@ -87,7 +88,7 @@ private fun PlanetDetailsComposable(
                 PlanetComposable(
                     headlineContent = {
                         PlanetNameComposable(
-                            name = current.details.name,
+                            name = current.details.planet.name,
                             stylable = true
                         )
                     },
@@ -99,7 +100,7 @@ private fun PlanetDetailsComposable(
                     },
                     label = stringResource(
                         CommonR.string.common_ui_accessibility_planet_details,
-                        current.details.name
+                        current.details.planet.name
                     ),
                     modifier = Modifier.padding(padding),
                 )
@@ -182,8 +183,10 @@ private fun PlanetDetailScreenPreview() {
         PlanetDetailsComposable(
             state = DetailsSuccess(
                 details = PlanetDetails(
-                    uid = "1",
-                    name = "Tatooine",
+                    planet = Planet(
+                        uid = "1",
+                        name = "Tatooine"
+                    ),
                     climate = "Arid",
                     population = "200000",
                     diameter = "10465",

@@ -4,11 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlanetDetails(
-    val uid: String,
-    val name: String,
+    val planet: Planet,
     val climate: String,
     val population: String,
     val diameter: String,
     val gravity: String,
     val terrain: String
-)
+) {
+    val uid: String get() = planet.uid
+    val name: String get() = planet.name
+}

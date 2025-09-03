@@ -1,5 +1,6 @@
 package com.tsaha.nucleus.data.datasource
 
+import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
 import org.junit.Before
 
@@ -8,8 +9,7 @@ class InMemoryPlanetDetailsDataSourceTest {
     private lateinit var dataSource: InMemoryPlanetDataSource
 
     private val samplePlanet1 = PlanetDetails(
-        uid = "planet1",
-        name = "Tatooine",
+        planet = Planet(uid = "planet1", name = "Tatooine"),
         climate = "arid",
         population = "200000",
         diameter = "10465",
@@ -18,8 +18,7 @@ class InMemoryPlanetDetailsDataSourceTest {
     )
 
     private val samplePlanet2 = PlanetDetails(
-        uid = "planet2",
-        name = "Alderaan",
+        planet = Planet(uid = "planet2", name = "Alderaan"),
         climate = "temperate",
         population = "2000000000",
         diameter = "12500",

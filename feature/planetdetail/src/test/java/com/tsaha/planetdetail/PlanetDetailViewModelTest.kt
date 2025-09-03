@@ -42,8 +42,7 @@ class PlanetDetailViewModelTest {
     // Test Data
     private val testPlanetId = "test-planet-123"
     private val testPlanetDetails = PlanetDetails(
-        uid = testPlanetId,
-        name = "Tatooine",
+        planet = com.tsaha.nucleus.data.model.Planet(uid = testPlanetId, name = "Tatooine"),
         climate = "arid",
         population = "200000",
         diameter = "10465",

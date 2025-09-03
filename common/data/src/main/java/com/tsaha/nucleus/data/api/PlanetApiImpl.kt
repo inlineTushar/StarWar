@@ -49,9 +49,13 @@ class PlanetApiImpl(
             val response = httpClient.get("$PLANETS_ENDPOINT/$id")
                 .body<PlanetDetailApiResponse>()
 
-            val planetDetails = PlanetDetails(
+            val planet = Planet(
                 uid = response.result.uid,
-                name = response.result.properties.name,
+                name = response.result.properties.name
+            )
+
+            val planetDetails = PlanetDetails(
+                planet = planet,
                 climate = response.result.properties.climate,
                 population = response.result.properties.population,
                 diameter = response.result.properties.diameter,

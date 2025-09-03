@@ -13,9 +13,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
-import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem
+import com.tsaha.planetlist.model.PlanetItemLoadingState
 import com.tsaha.planetlist.model.PlanetListUiState
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -52,21 +52,14 @@ class PlanetListScreenTest {
         val testPlanets = listOf(
             PlanetItem(
                 planet = Planet(uid = "1", name = "Tatooine"),
-                detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetails(
-                        uid = "1",
-                        name = "Tatooine",
-                        climate = "Arid",
-                        population = "200000",
-                        diameter = "10465",
-                        gravity = "1 standard",
-                        terrain = "Desert"
-                    )
+                loadingState = PlanetItemLoadingState.Loaded(
+                    climate = "Arid",
+                    population = "200000"
                 )
             ),
             PlanetItem(
                 planet = Planet(uid = "2", name = "Alderaan"),
-                detailsState = PlanetDetailsUiState.DetailsLoading
+                loadingState = PlanetItemLoadingState.Loading
             )
         )
 
@@ -98,7 +91,7 @@ class PlanetListScreenTest {
         val testPlanets = listOf(
             PlanetItem(
                 planet = testPlanet,
-                detailsState = PlanetDetailsUiState.DetailsLoading
+                loadingState = PlanetItemLoadingState.Loading
             )
         )
 
@@ -196,7 +189,7 @@ class PlanetListScreenTest {
         val testPlanets = listOf(
             PlanetItem(
                 planet = Planet(uid = "1", name = "State Change Planet"),
-                detailsState = PlanetDetailsUiState.DetailsLoading
+                loadingState = PlanetItemLoadingState.Loading
             )
         )
         stateFlow.value = PlanetListUiState.ListSuccess(testPlanets)
@@ -212,25 +205,18 @@ class PlanetListScreenTest {
         val mixedStatePlanets = listOf(
             PlanetItem(
                 planet = Planet(uid = "1", name = "Loading Planet"),
-                detailsState = PlanetDetailsUiState.DetailsLoading
+                loadingState = PlanetItemLoadingState.Loading
             ),
             PlanetItem(
                 planet = Planet(uid = "2", name = "Success Planet"),
-                detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetails(
-                        uid = "2",
-                        name = "Success Planet",
-                        climate = "Temperate",
-                        population = "1000000",
-                        diameter = "12000",
-                        gravity = "1g",
-                        terrain = "Mixed"
-                    )
+                loadingState = PlanetItemLoadingState.Loaded(
+                    climate = "Temperate",
+                    population = "1000000"
                 )
             ),
             PlanetItem(
                 planet = Planet(uid = "3", name = "Error Planet"),
-                detailsState = PlanetDetailsUiState.DetailsError("Load failed")
+                loadingState = PlanetItemLoadingState.LoadFailed("Load failed")
             )
         )
 
@@ -267,7 +253,7 @@ class PlanetListScreenTest {
         val testPlanet = Planet(uid = "nav-test", name = "Navigation Planet")
         every { mockViewModel.uiState } returns MutableStateFlow(
             PlanetListUiState.ListSuccess(
-                listOf(PlanetItem(testPlanet, PlanetDetailsUiState.DetailsLoading))
+                listOf(PlanetItem(testPlanet, PlanetItemLoadingState.Loading))
             )
         )
         every { mockViewModel.navEvent } returns emptyFlow()

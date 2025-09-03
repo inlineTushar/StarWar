@@ -8,7 +8,7 @@ import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -28,10 +28,10 @@ class PlanetDetailViewModel(
         )
 
     suspend fun getPlanetDetail(planetId: String) {
-        channelFlow {
+        flow {
             planetRepository.getPlanet(planetId)
-                .onSuccess { planet -> send(PlanetDetailsUiState.DetailsSuccess(planet)) }
-                .onFailure { send(PlanetDetailsUiState.DetailsError(it.message)) }
+                .onSuccess { planet -> emit(PlanetDetailsUiState.DetailsSuccess(planet)) }
+                .onFailure { emit(PlanetDetailsUiState.DetailsError(it.message)) }
         }.onEach { uiStateMutable.value = it }
             .stateIn(viewModelScope)
     }

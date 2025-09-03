@@ -23,9 +23,6 @@ import com.tsaha.feature.planetlist.R
 import com.tsaha.navigation.Route
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
-import com.tsaha.nucleus.ui.PlanetDetailsUiState
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
 import com.tsaha.nucleus.ui.component.ErrorComposable
 import com.tsaha.nucleus.ui.component.NucleusAppBar
 import com.tsaha.nucleus.ui.component.PlanetComposable
@@ -34,6 +31,7 @@ import com.tsaha.nucleus.ui.component.ProgressBarComposable
 import com.tsaha.nucleus.ui.component.ShimmerComposable
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem
+import com.tsaha.planetlist.model.PlanetItemLoadingState
 import com.tsaha.planetlist.model.PlanetListUiState
 import com.tsaha.planetlist.model.PlanetListUiState.ListError
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
@@ -95,7 +93,7 @@ private fun PlanetListComposable(
                     ) { item ->
                         PlanetComposable(
                             headlineContent = { PlanetNameComposable(name = item.planet.name) },
-                            subHeadingContent = { PlanetInfoComposable(planetDetailsUiState = item.detailsState) },
+                            subHeadingContent = { PlanetInfoComposable(loadingState = item.loadingState) },
                             onClick = { onClickPlanet(item.planet) },
                             label = stringResource(CommonR.string.common_ui_accessibility_planet_item, item.planet.name)
                         )
@@ -113,29 +111,31 @@ private fun PlanetListComposable(
 
 @Composable
 private fun PlanetInfoComposable(
-    planetDetailsUiState: PlanetDetailsUiState,
+    loadingState: PlanetItemLoadingState,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        when (planetDetailsUiState) {
-            is DetailsLoading -> {
+        when (loadingState) {
+            is PlanetItemLoadingState.Loading -> {
                 ShimmerComposable()
                 Spacer(modifier = Modifier.padding(vertical = 4.dp))
                 ShimmerComposable()
             }
 
-            is DetailsSuccess -> {
+            is PlanetItemLoadingState.Loaded -> {
                 Text(
-                    text = planetDetailsUiState.details.climate,
+                    text = loadingState.climate,
                     style = MaterialTheme.typography.headlineMedium.copy(fontStyle = FontStyle.Italic)
                 )
                 Text(
-                    text = planetDetailsUiState.details.population,
+                    text = loadingState.population,
                     style = MaterialTheme.typography.headlineMedium.copy(fontStyle = FontStyle.Italic)
                 )
             }
 
-            else -> {}
+            is PlanetItemLoadingState.LoadFailed -> {
+                // show nothing
+            }
         }
     }
 }
@@ -146,7 +146,7 @@ private fun PlanetListItemPreview() {
     NucleusTheme {
         PlanetComposable(
             headlineContent = { Text(text = "Earth") },
-            subHeadingContent = { PlanetInfoComposable(DetailsLoading) },
+            subHeadingContent = { PlanetInfoComposable(PlanetItemLoadingState.Loading) },
             onClick = {},
             label = stringResource(CommonR.string.common_ui_accessibility_planet_item, "Earth")
         )
@@ -187,23 +187,16 @@ private fun PlanetListComposableSuccessPreview() {
                             uid = "1",
                             name = "Earth"
                         ),
-                        detailsState = DetailsLoading
+                        loadingState = PlanetItemLoadingState.Loading
                     ),
                     PlanetItem(
                         planet = Planet(
                             uid = "2",
                             name = "Mars"
                         ),
-                        detailsState = DetailsSuccess(
-                            details = PlanetDetails(
-                                uid = "2",
-                                name = "Mars",
-                                climate = "Cold",
-                                population = "1M",
-                                diameter = "1000km",
-                                gravity = "1g",
-                                terrain = "Rocky"
-                            )
+                        loadingState = PlanetItemLoadingState.Loaded(
+                            climate = "Cold",
+                            population = "1M"
                         )
                     )
                 )
