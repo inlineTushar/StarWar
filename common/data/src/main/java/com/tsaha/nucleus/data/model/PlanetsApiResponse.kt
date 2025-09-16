@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class PlanetsApiResponse(
     val message: String,
     val next: String?,
-    val results: List<Planet>
+    val results: List<PlanetApiModel>
 )

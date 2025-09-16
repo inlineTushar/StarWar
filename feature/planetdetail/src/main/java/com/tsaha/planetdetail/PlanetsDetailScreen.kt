@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -25,7 +24,7 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
@@ -110,7 +109,7 @@ private fun PlanetDetailsComposable(
 
 @Composable
 private fun PlanetInfoComposable(
-    planet: PlanetDetails,
+    planet: PlanetDetailsApiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -181,7 +180,7 @@ private fun PlanetDetailScreenPreview() {
     NucleusTheme {
         PlanetDetailsComposable(
             state = DetailsSuccess(
-                details = PlanetDetails(
+                details = PlanetDetailsApiModel(
                     uid = "1",
                     name = "Tatooine",
                     climate = "Arid",

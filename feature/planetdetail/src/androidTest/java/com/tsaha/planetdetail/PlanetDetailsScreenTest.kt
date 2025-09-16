@@ -4,18 +4,15 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
@@ -41,7 +38,7 @@ class PlanetDetailsScreenTest {
     fun planetDetailsScreen_withMockViewModel_rendersCorrectly() {
         // Given - Mock ViewModel with success state
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
-        val testPlanetDetails = PlanetDetails(
+        val testPlanetDetails = PlanetDetailsApiModel(
             uid = "1",
             name = "Tatooine",
             climate = "Arid",
@@ -147,7 +144,7 @@ class PlanetDetailsScreenTest {
         composeTestRule.onRoot().assertIsDisplayed()
 
         // When - Change to success state
-        val planetDetails = PlanetDetails(
+        val planetDetails = PlanetDetailsApiModel(
             uid = "2",
             name = "Alderaan",
             climate = "Temperate",
@@ -173,7 +170,7 @@ class PlanetDetailsScreenTest {
     fun planetDetailsScreen_withDifferentPlanetData_displaysCorrectly() {
         // Given - Different planet data
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
-        val planetDetails = PlanetDetails(
+        val planetDetails = PlanetDetailsApiModel(
             uid = "3",
             name = "Coruscant",
             climate = "Temperate",
@@ -213,7 +210,7 @@ class PlanetDetailsScreenTest {
     fun planetDetailsScreen_navigationIntegration_worksWithNavController() {
         // Given
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
-        val planetDetails = PlanetDetails(
+        val planetDetails = PlanetDetailsApiModel(
             uid = "nav-test",
             name = "Navigation Test Planet",
             climate = "Test Climate",
@@ -251,7 +248,7 @@ class PlanetDetailsScreenTest {
     fun planetDetailsScreen_backButtonIntegration_triggersNavigation() {
         // Given - Mock ViewModel with success state
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
-        val planetDetails = PlanetDetails(
+        val planetDetails = PlanetDetailsApiModel(
             uid = "back-test",
             name = "Back Test Planet",
             climate = "Test",
@@ -287,7 +284,7 @@ class PlanetDetailsScreenTest {
     fun planetDetailsScreen_withLongPlanetData_handlesGracefully() {
         // Given - Planet with long data values
         val mockViewModel = mockk<PlanetDetailViewModel>(relaxed = true)
-        val planetDetails = PlanetDetails(
+        val planetDetails = PlanetDetailsApiModel(
             uid = "long-data-test",
             name = "Very Long Planet Name That Should Be Displayed Properly",
             climate = "Very complex climate with multiple atmospheric conditions and variations",

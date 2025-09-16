@@ -4,17 +4,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlanetDetailApiResponse(
-    val result: PlanetDetailResult
+    val result: PlanetDetailApiResult
 )
 
 @Serializable
-data class PlanetDetailResult(
-    val properties: PlanetDetailProperties,
+data class PlanetDetailApiResult(
+    val properties: PlanetDetailApiProperties,
     val uid: String
 )
 
 @Serializable
-data class PlanetDetailProperties(
+data class PlanetDetailApiProperties(
     val name: String,
     val climate: String,
     val population: String,

@@ -2,7 +2,7 @@ package com.tsaha.planetlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetApiModel
 import com.tsaha.planetlist.NavEvent.*
 import com.tsaha.planetlist.model.PlanetListUiState
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
@@ -58,7 +58,7 @@ class PlanetListViewModel(
                 initialValue = ListLoading
             )
 
-    fun onClickPlanet(planet: Planet) {
+    fun onClickPlanet(planet: PlanetApiModel) {
         viewModelScope.launch {
             navEventChannel.send(ToPlanetDetails(planet.uid))
         }

@@ -6,9 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.Pagination
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PaginationApiModel
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
@@ -46,24 +46,24 @@ class PlanetListUseCaseTest {
     private lateinit var mockRepository: MockPlanetRepository
 
     // Test Data
-    private val samplePagination = Pagination(currentPage = 1, nextPage = null)
-    private val tatooine = Planet(uid = "1", name = "Tatooine")
-    private val alderaan = Planet(uid = "2", name = "Alderaan")
-    private val coruscant = Planet(uid = "3", name = "Coruscant")
+    private val samplePaginationApiModel = PaginationApiModel(currentPage = 1, nextPage = null)
+    private val tatooine = PlanetApiModel(uid = "1", name = "Tatooine")
+    private val alderaan = PlanetApiModel(uid = "2", name = "Alderaan")
+    private val coruscant = PlanetApiModel(uid = "3", name = "Coruscant")
 
-    private val tatooineDetails = PlanetDetails(
+    private val tatooineDetails = PlanetDetailsApiModel(
         uid = "1", name = "Tatooine", climate = "arid",
         population = "200000", diameter = "10465",
         gravity = "1 standard", terrain = "desert"
     )
 
-    private val alderaanDetails = PlanetDetails(
+    private val alderaanDetails = PlanetDetailsApiModel(
         uid = "2", name = "Alderaan", climate = "temperate",
         population = "2000000000", diameter = "12500",
         gravity = "1 standard", terrain = "grasslands, mountains"
     )
 
-    private val coruscantDetails = PlanetDetails(
+    private val coruscantDetails = PlanetDetailsApiModel(
         uid = "3", name = "Coruscant", climate = "temperate",
         population = "1000000000000", diameter = "12240",
         gravity = "1 standard", terrain = "cityscape"
@@ -268,14 +268,14 @@ class PlanetListUseCaseTest {
     @Test
     fun `observePlanets should handle large number of planets`() = runBlocking {
         // Given
-        val manyPlanets = (1..20).map { Planet(uid = it.toString(), name = "Planet $it") }
+        val manyPlanets = (1..20).map { PlanetApiModel(uid = it.toString(), name = "Planet $it") }
         mockRepository.setupSuccessfulPlanetsResponse(manyPlanets)
 
         // Setup details for all planets
         manyPlanets.forEach { planet ->
             mockRepository.setupSuccessfulPlanetDetail(
                 planet.uid,
-                PlanetDetails(
+                PlanetDetailsApiModel(
                     uid = planet.uid, name = planet.name, climate = "varies",
                     population = "unknown", diameter = "unknown",
                     gravity = "1 standard", terrain = "mixed"
@@ -356,18 +356,18 @@ class PlanetListUseCaseTest {
         var getPlanetCallCount = 0
         var lastPageSize = -1
 
-        private var planetsResponse: Result<Pair<Pagination, List<Planet>>>? = null
-        val planetDetailsMap = mutableMapOf<String, Result<PlanetDetails>>()
+        private var planetsResponse: Result<Pair<PaginationApiModel, List<PlanetApiModel>>>? = null
+        val planetDetailsMap = mutableMapOf<String, Result<PlanetDetailsApiModel>>()
 
-        fun setupSuccessfulPlanetsResponse(planets: List<Planet>) {
-            planetsResponse = Result.success(Pagination(1, null) to planets)
+        fun setupSuccessfulPlanetsResponse(planets: List<PlanetApiModel>) {
+            planetsResponse = Result.success(PaginationApiModel(1, null) to planets)
         }
 
         fun setupFailurePlanetsResponse(errorMessage: String) {
             planetsResponse = Result.failure(RuntimeException(errorMessage))
         }
 
-        fun setupSuccessfulPlanetDetail(planetId: String, details: PlanetDetails) {
+        fun setupSuccessfulPlanetDetail(planetId: String, details: PlanetDetailsApiModel) {
             planetDetailsMap[planetId] = Result.success(details)
         }
 
@@ -378,17 +378,17 @@ class PlanetListUseCaseTest {
         override suspend fun getPlanetsWithPagination(
             pageNumber: Int,
             limit: Int
-        ): Result<Pair<Pagination, List<Planet>>> {
+        ): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
             getPlanetsCallCount++
             lastPageSize = limit
             return planetsResponse ?: Result.failure(RuntimeException("Not configured"))
         }
 
-        override suspend fun getPlanetsWithPagination(limit: Int): Result<Pair<Pagination, List<Planet>>> {
+        override suspend fun getPlanetsWithPagination(limit: Int): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
             return getPlanetsWithPagination(1, limit)
         }
 
-        override suspend fun getPlanet(id: String): Result<PlanetDetails> {
+        override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
             getPlanetCallCount++
             return planetDetailsMap[id] ?: Result.failure(RuntimeException("Planet $id not found"))
         }

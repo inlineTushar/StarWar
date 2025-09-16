@@ -7,7 +7,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isSameAs
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +41,7 @@ class PlanetDetailViewModelTest {
 
     // Test Data
     private val testPlanetId = "test-planet-123"
-    private val testPlanetDetails = PlanetDetails(
+    private val testPlanetDetails = PlanetDetailsApiModel(
         uid = testPlanetId,
         name = "Tatooine",
         climate = "arid",
@@ -312,9 +312,9 @@ class PlanetDetailViewModelTest {
         var getPlanetCallCount = 0
         var lastRequestedId: String? = null
 
-        private val responses = mutableMapOf<String, Result<PlanetDetails>>()
+        private val responses = mutableMapOf<String, Result<PlanetDetailsApiModel>>()
 
-        fun setupSuccessResponse(planetId: String, planetDetails: PlanetDetails) {
+        fun setupSuccessResponse(planetId: String, planetDetails: PlanetDetailsApiModel) {
             responses[planetId] = Result.success(planetDetails)
         }
 
@@ -323,16 +323,16 @@ class PlanetDetailViewModelTest {
         }
 
         override suspend fun getPlanetsWithPagination(pageNumber: Int, limit: Int) =
-            Result.failure<Pair<com.tsaha.nucleus.data.model.Pagination, List<com.tsaha.nucleus.data.model.Planet>>>(
+            Result.failure<Pair<com.tsaha.nucleus.data.model.PaginationApiModel, List<com.tsaha.nucleus.data.model.PlanetApiModel>>>(
                 RuntimeException("Not used in detail view")
             )
 
         override suspend fun getPlanetsWithPagination(limit: Int) =
-            Result.failure<Pair<com.tsaha.nucleus.data.model.Pagination, List<com.tsaha.nucleus.data.model.Planet>>>(
+            Result.failure<Pair<com.tsaha.nucleus.data.model.PaginationApiModel, List<com.tsaha.nucleus.data.model.PlanetApiModel>>>(
                 RuntimeException("Not used in detail view")
             )
 
-        override suspend fun getPlanet(id: String): Result<PlanetDetails> {
+        override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
             getPlanetCallCount++
             lastRequestedId = id
 

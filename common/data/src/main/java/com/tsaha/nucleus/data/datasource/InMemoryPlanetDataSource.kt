@@ -1,6 +1,7 @@
 package com.tsaha.nucleus.data.datasource
 
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
@@ -10,19 +11,18 @@ import java.util.concurrent.ConcurrentHashMap
  * for thread-safe storage of planet details by ID
  */
 class InMemoryPlanetDataSource : PlanetDataSource {
-
-    private val planetsMap = ConcurrentHashMap<String, PlanetDetails>()
+    private val planetsMap = ConcurrentHashMap<String, PlanetDetailsMemoryModel>()
     private val mutex = Mutex()
 
-    override suspend fun storePlanet(planetDetails: PlanetDetails) {
+    override suspend fun storePlanet(planetDetails: PlanetDetailsMemoryModel) {
         mutex.withLock { planetsMap[planetDetails.uid] = planetDetails }
     }
 
-    override suspend fun getPlanet(planetId: String): PlanetDetails? {
+    override suspend fun getPlanet(planetId: String): PlanetDetailsMemoryModel? {
         return planetsMap[planetId]
     }
 
-    override suspend fun storePlanets(planetList: List<PlanetDetails>) {
+    override suspend fun storePlanets(planetList: List<PlanetDetailsMemoryModel>) {
         mutex.withLock {
             planetList.forEach { planetDetails ->
                 planetsMap[planetDetails.uid] = planetDetails
@@ -30,7 +30,7 @@ class InMemoryPlanetDataSource : PlanetDataSource {
         }
     }
 
-    override suspend fun getAllPlanets(): List<PlanetDetails> {
+    override suspend fun getAllPlanets(): List<PlanetDetailsMemoryModel> {
         return planetsMap.values.toList()
     }
 

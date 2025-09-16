@@ -4,7 +4,7 @@ package com.tsaha.nucleus.data.model
  * Represents pagination information for API responses
  * @param hasNext true if there is a next page available, false otherwise
  */
-data class Pagination(
+data class PaginationApiModel(
     val currentPage: Int,
     val nextPage: String?,
 ) {

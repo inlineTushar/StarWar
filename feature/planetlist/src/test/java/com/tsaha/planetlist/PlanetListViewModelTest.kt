@@ -6,9 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.Pagination
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PaginationApiModel
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.planetlist.model.PlanetListUiState
 import kotlinx.coroutines.Dispatchers
@@ -30,9 +30,9 @@ class PlanetListViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     // Test Data
-    private val tatooine = Planet(uid = "1", name = "Tatooine")
-    private val alderaan = Planet(uid = "2", name = "Alderaan")
-    private val coruscant = Planet(uid = "3", name = "Coruscant")
+    private val tatooine = PlanetApiModel(uid = "1", name = "Tatooine")
+    private val alderaan = PlanetApiModel(uid = "2", name = "Alderaan")
+    private val coruscant = PlanetApiModel(uid = "3", name = "Coruscant")
 
     @Before
     fun setUp() {
@@ -122,7 +122,7 @@ class PlanetListViewModelTest {
     @Test
     fun `onClickPlanet should handle planet with empty UID`() = runTest {
         // Given
-        val planetWithEmptyId = Planet(uid = "", name = "Empty ID Planet")
+        val planetWithEmptyId = PlanetApiModel(uid = "", name = "Empty ID Planet")
 
         // When & Then
         viewModel.navEvent.test {
@@ -141,7 +141,7 @@ class PlanetListViewModelTest {
         viewModel.navEvent.test {
             // Simulate rapid clicks (stress test)
             repeat(10) { index ->
-                val planet = Planet(uid = index.toString(), name = "Planet $index")
+                val planet = PlanetApiModel(uid = index.toString(), name = "Planet $index")
                 viewModel.onClickPlanet(planet)
 
                 val event = awaitItem()
@@ -211,7 +211,7 @@ class PlanetListViewModelTest {
     @Test
     fun `Planet model should have required properties for navigation`() {
         // Given
-        val planet = Planet(uid = "test-uid", name = "Test Planet")
+        val planet = PlanetApiModel(uid = "test-uid", name = "Test Planet")
 
         // When & Then
         assertThat(planet.uid).isNotNull()
@@ -242,11 +242,11 @@ class PlanetListViewModelTest {
 
     private class MockPlanetRepository : PlanetRepository {
         private val mockPlanets = listOf(
-            Planet(uid = "1", name = "Tatooine"),
-            Planet(uid = "2", name = "Alderaan")
+            PlanetApiModel(uid = "1", name = "Tatooine"),
+            PlanetApiModel(uid = "2", name = "Alderaan")
         )
 
-        private val mockPlanetDetails = PlanetDetails(
+        private val mockPlanetDetails = PlanetDetailsApiModel(
             uid = "1", name = "Tatooine", climate = "arid",
             population = "200000", diameter = "10465",
             gravity = "1 standard", terrain = "desert"
@@ -255,15 +255,15 @@ class PlanetListViewModelTest {
         override suspend fun getPlanetsWithPagination(
             pageNumber: Int,
             limit: Int
-        ): Result<Pair<Pagination, List<Planet>>> {
-            return Result.success(Pagination(1, null) to mockPlanets)
+        ): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
+            return Result.success(PaginationApiModel(1, null) to mockPlanets)
         }
 
-        override suspend fun getPlanetsWithPagination(limit: Int): Result<Pair<Pagination, List<Planet>>> {
+        override suspend fun getPlanetsWithPagination(limit: Int): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
             return getPlanetsWithPagination(1, limit)
         }
 
-        override suspend fun getPlanet(id: String): Result<PlanetDetails> {
+        override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
             return Result.success(mockPlanetDetails)
         }
     }

@@ -24,8 +24,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.tsaha.feature.planetlist.R
 import com.tsaha.navigation.Route
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
@@ -89,7 +89,7 @@ private fun PlanetListComposable(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
-    onClickPlanet: (Planet) -> Unit,
+    onClickPlanet: (PlanetApiModel) -> Unit,
     listState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -263,19 +263,19 @@ private fun PlanetListComposableSuccessPreview() {
             state = ListSuccess(
                 planetItems = listOf(
                     PlanetItem(
-                        planet = Planet(
+                        planet = PlanetApiModel(
                             uid = "1",
                             name = "Earth"
                         ),
                         detailsState = DetailsLoading
                     ),
                     PlanetItem(
-                        planet = Planet(
+                        planet = PlanetApiModel(
                             uid = "2",
                             name = "Mars"
                         ),
                         detailsState = DetailsSuccess(
-                            details = PlanetDetails(
+                            details = PlanetDetailsApiModel(
                                 uid = "2",
                                 name = "Mars",
                                 climate = "Cold",
@@ -305,12 +305,12 @@ private fun PlanetListComposableSearchPreview() {
             state = SearchResult(
                 planetItems = listOf(
                     PlanetItem(
-                        planet = Planet(
+                        planet = PlanetApiModel(
                             uid = "1",
                             name = "Tatooine"
                         ),
                         detailsState = DetailsSuccess(
-                            details = PlanetDetails(
+                            details = PlanetDetailsApiModel(
                                 uid = "1",
                                 name = "Tatooine",
                                 climate = "Arid",

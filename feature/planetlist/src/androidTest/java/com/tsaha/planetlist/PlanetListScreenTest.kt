@@ -5,23 +5,18 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
-import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem
 import com.tsaha.planetlist.model.PlanetListUiState
-import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -51,9 +46,9 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         val testPlanets = listOf(
             PlanetItem(
-                planet = Planet(uid = "1", name = "Tatooine"),
+                planet = PlanetApiModel(uid = "1", name = "Tatooine"),
                 detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetails(
+                    PlanetDetailsApiModel(
                         uid = "1",
                         name = "Tatooine",
                         climate = "Arid",
@@ -65,7 +60,7 @@ class PlanetListScreenTest {
                 )
             ),
             PlanetItem(
-                planet = Planet(uid = "2", name = "Alderaan"),
+                planet = PlanetApiModel(uid = "2", name = "Alderaan"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             )
         )
@@ -94,7 +89,7 @@ class PlanetListScreenTest {
     fun planetListScreen_planetClick_triggersViewModelMethod() {
         // Given
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
-        val testPlanet = Planet(uid = "1", name = "Clickable Planet")
+        val testPlanet = PlanetApiModel(uid = "1", name = "Clickable Planet")
         val testPlanets = listOf(
             PlanetItem(
                 planet = testPlanet,
@@ -195,7 +190,7 @@ class PlanetListScreenTest {
         // When - Change to success state
         val testPlanets = listOf(
             PlanetItem(
-                planet = Planet(uid = "1", name = "State Change Planet"),
+                planet = PlanetApiModel(uid = "1", name = "State Change Planet"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             )
         )
@@ -211,13 +206,13 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         val mixedStatePlanets = listOf(
             PlanetItem(
-                planet = Planet(uid = "1", name = "Loading Planet"),
+                planet = PlanetApiModel(uid = "1", name = "Loading Planet"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             ),
             PlanetItem(
-                planet = Planet(uid = "2", name = "Success Planet"),
+                planet = PlanetApiModel(uid = "2", name = "Success Planet"),
                 detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetails(
+                    PlanetDetailsApiModel(
                         uid = "2",
                         name = "Success Planet",
                         climate = "Temperate",
@@ -229,7 +224,7 @@ class PlanetListScreenTest {
                 )
             ),
             PlanetItem(
-                planet = Planet(uid = "3", name = "Error Planet"),
+                planet = PlanetApiModel(uid = "3", name = "Error Planet"),
                 detailsState = PlanetDetailsUiState.DetailsError("Load failed")
             )
         )
@@ -264,7 +259,7 @@ class PlanetListScreenTest {
     fun planetListScreen_navigationIntegration_worksWithNavController() {
         // Given
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
-        val testPlanet = Planet(uid = "nav-test", name = "Navigation Planet")
+        val testPlanet = PlanetApiModel(uid = "nav-test", name = "Navigation Planet")
         every { mockViewModel.uiState } returns MutableStateFlow(
             PlanetListUiState.ListSuccess(
                 listOf(PlanetItem(testPlanet, PlanetDetailsUiState.DetailsLoading))

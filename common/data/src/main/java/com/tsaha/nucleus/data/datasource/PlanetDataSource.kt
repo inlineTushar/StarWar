@@ -1,6 +1,7 @@
 package com.tsaha.nucleus.data.datasource
 
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
 
 /**
  * Data source interface for storing and retrieving planet details by ID
@@ -11,26 +12,26 @@ interface PlanetDataSource {
      * Store planet details with the planet's UID as the key
      * @param planetDetails the planet details to store
      */
-    suspend fun storePlanet(planetDetails: PlanetDetails)
+    suspend fun storePlanet(planetDetails: PlanetDetailsMemoryModel)
 
     /**
      * Retrieve planet details by ID
      * @param planetId the ID of the planet to retrieve
      * @return the planet details if found, null otherwise
      */
-    suspend fun getPlanet(planetId: String): PlanetDetails?
+    suspend fun getPlanet(planetId: String): PlanetDetailsMemoryModel?
 
     /**
      * Store multiple planet details at once
      * @param planetList list of planet details to store
      */
-    suspend fun storePlanets(planetList: List<PlanetDetails>)
+    suspend fun storePlanets(planetList: List<PlanetDetailsMemoryModel>)
 
     /**
      * Get all stored planet details
      * @return list of all stored planet details
      */
-    suspend fun getAllPlanets(): List<PlanetDetails>
+    suspend fun getAllPlanets(): List<PlanetDetailsMemoryModel>
 
     /**
      * Clear all stored planet details

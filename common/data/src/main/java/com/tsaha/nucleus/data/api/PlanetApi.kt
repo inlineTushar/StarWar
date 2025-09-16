@@ -1,8 +1,8 @@
 package com.tsaha.nucleus.data.api
 
-import com.tsaha.nucleus.data.model.Pagination
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PaginationApiModel
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 
 /**
  * API interface for planet-related operations
@@ -14,12 +14,12 @@ interface PlanetApi {
      * @param limit The number of planets per page
      * @return Pair of PaginationInfo and List of Planets
      */
-    suspend fun getPlanets(pageNumber: Int, limit: Int): Result<Pair<Pagination, List<Planet>>>
+    suspend fun getPlanets(pageNumber: Int, limit: Int): Result<Pair<PaginationApiModel, List<PlanetApiModel>>>
 
     /**
      * Fetches detailed information for a specific planet
      * @param id The planet ID (uid) to fetch details for
      * @return PlanetDetail with detailed information
      */
-    suspend fun getPlanet(id: String): Result<PlanetDetails>
+    suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel>
 }

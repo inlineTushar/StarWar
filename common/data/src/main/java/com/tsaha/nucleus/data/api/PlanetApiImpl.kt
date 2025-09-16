@@ -1,8 +1,8 @@
 package com.tsaha.nucleus.data.api
 
-import com.tsaha.nucleus.data.model.Pagination
-import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
+import com.tsaha.nucleus.data.model.PaginationApiModel
+import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.model.PlanetsApiResponse
 import com.tsaha.nucleus.data.model.PlanetDetailApiResponse
 import io.ktor.client.HttpClient
@@ -26,30 +26,30 @@ class PlanetApiImpl(
     override suspend fun getPlanets(
         pageNumber: Int,
         limit: Int
-    ): Result<Pair<Pagination, List<Planet>>> {
+    ): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
         return try {
             val response = httpClient.get(PLANETS_ENDPOINT) {
                 parameter("page", pageNumber)
                 parameter("limit", limit)
             }.body<PlanetsApiResponse>()
 
-            val pagination = Pagination(
+            val paginationModel = PaginationApiModel(
                 currentPage = pageNumber,
                 nextPage = response.next
             )
             val planets = response.results
-            Result.success(pagination to planets)
+            Result.success(paginationModel to planets)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getPlanet(id: String): Result<PlanetDetails> {
+    override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
         return try {
             val response = httpClient.get("$PLANETS_ENDPOINT/$id")
                 .body<PlanetDetailApiResponse>()
 
-            val planetDetails = PlanetDetails(
+            val planetDetails = PlanetDetailsApiModel(
                 uid = response.result.uid,
                 name = response.result.properties.name,
                 climate = response.result.properties.climate,
