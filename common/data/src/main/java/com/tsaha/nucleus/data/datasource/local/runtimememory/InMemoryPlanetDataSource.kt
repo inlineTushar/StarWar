@@ -1,6 +1,5 @@
-package com.tsaha.nucleus.data.datasource
+package com.tsaha.nucleus.data.datasource.local.runtimememory
 
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -10,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
  * In-memory implementation of PlanetDetailsDataSource using a ConcurrentHashMap
  * for thread-safe storage of planet details by ID
  */
-class InMemoryPlanetDataSource : PlanetDataSource {
+class InMemoryPlanetDataSource : PlanetLocalDataSource {
     private val planetsMap = ConcurrentHashMap<String, PlanetDetailsMemoryModel>()
     private val mutex = Mutex()
 

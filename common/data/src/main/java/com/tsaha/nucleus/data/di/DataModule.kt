@@ -1,9 +1,10 @@
 package com.tsaha.nucleus.data.di
 
-import com.tsaha.nucleus.data.api.PlanetApi
-import com.tsaha.nucleus.data.api.PlanetApiImpl
-import com.tsaha.nucleus.data.datasource.InMemoryPlanetDataSource
-import com.tsaha.nucleus.data.datasource.PlanetDataSource
+import com.tsaha.nucleus.data.datasource.remote.api.PlanetApi
+import com.tsaha.nucleus.data.datasource.remote.api.PlanetApiImpl
+import com.tsaha.nucleus.data.datasource.local.runtimememory.InMemoryPlanetDataSource
+import com.tsaha.nucleus.data.datasource.local.runtimememory.PlanetLocalDataSource
+import com.tsaha.nucleus.data.datasource.remote.PlanetRemoteDataSource
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.data.repository.PlanetRepositoryImpl
 import org.koin.core.module.dsl.bind
@@ -17,6 +18,7 @@ import org.koin.dsl.module
 val dataModule = module {
     includes(httpModule)
     singleOf(::PlanetApiImpl) { bind<PlanetApi>() }
-    singleOf(::InMemoryPlanetDataSource) { bind<PlanetDataSource>() }
+    singleOf(::InMemoryPlanetDataSource) { bind<PlanetLocalDataSource>() }
+    singleOf(::PlanetRemoteDataSource)
     singleOf(::PlanetRepositoryImpl) { bind<PlanetRepository>() }
 }

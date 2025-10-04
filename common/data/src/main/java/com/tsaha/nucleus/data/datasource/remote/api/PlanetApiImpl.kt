@@ -1,4 +1,4 @@
-package com.tsaha.nucleus.data.api
+package com.tsaha.nucleus.data.datasource.remote.api
 
 import com.tsaha.nucleus.data.model.PaginationApiModel
 import com.tsaha.nucleus.data.model.PlanetApiModel

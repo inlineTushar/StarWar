@@ -1,12 +1,11 @@
-package com.tsaha.nucleus.data.datasource
+package com.tsaha.nucleus.data.datasource.local.runtimememory
 
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
 
 /**
  * Data source interface for storing and retrieving planet details by ID
  */
-interface PlanetDataSource {
+interface PlanetLocalDataSource {
 
     /**
      * Store planet details with the planet's UID as the key

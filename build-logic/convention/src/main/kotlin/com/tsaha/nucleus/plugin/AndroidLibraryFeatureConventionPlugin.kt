@@ -44,6 +44,7 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 "implementation"(project(":common:core"))
                 "implementation"(project(":common:ui"))
                 "implementation"(project(":common:data"))
+                "implementation"(project(":common:domain"))
 
                 // Unit testing dependencies
                 "testImplementation"(libs.findLibrary("junit5").get())

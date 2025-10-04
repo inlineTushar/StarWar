@@ -1,7 +1,7 @@
 package com.tsaha.nucleus.data.repository
 
-import com.tsaha.nucleus.data.api.PlanetApi
-import com.tsaha.nucleus.data.datasource.PlanetDataSource
+import com.tsaha.nucleus.data.datasource.local.runtimememory.PlanetLocalDataSource
+import com.tsaha.nucleus.data.datasource.remote.PlanetRemoteDataSource
 import com.tsaha.nucleus.data.model.PaginationApiModel
 import com.tsaha.nucleus.data.model.PlanetApiModel
 import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
@@ -14,8 +14,8 @@ import com.tsaha.nucleus.data.model.asMemoryModel
  * @param planetApi The API interface for fetching planet data
  */
 class PlanetRepositoryImpl(
-    private val planetApi: PlanetApi,
-    private val planetDataSource: PlanetDataSource
+    private val remoteSource: PlanetRemoteDataSource,
+    private val localSource: PlanetLocalDataSource
 ) : PlanetRepository {
 
     override suspend fun getPlanetsWithPagination(
@@ -25,7 +25,7 @@ class PlanetRepositoryImpl(
         return try {
             require(pageNumber >= 1) { "Page number must be >= 1" }
             require(limit > 0) { "Limit must be > 0" }
-            planetApi.getPlanets(pageNumber, limit)
+            remoteSource.getPlanets(pageNumber, limit)
         } catch (e: IllegalArgumentException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -41,12 +41,12 @@ class PlanetRepositoryImpl(
     override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
         return try {
             require(id.isNotBlank()) { "Planet ID cannot be blank" }
-            planetDataSource.getPlanet(planetId = id)?.let { storedPlanet ->
+            localSource.getPlanet(planetId = id)?.let { storedPlanet ->
                 Result.success(storedPlanet.asApiModel())
             } ?: run {
-                val remotePlanet = planetApi.getPlanet(id)
+                val remotePlanet = remoteSource.getPlanet(id)
                 remotePlanet.onSuccess { planetDetails ->
-                    planetDataSource.storePlanet(planetDetails.asMemoryModel())
+                    localSource.storePlanet(planetDetails.asMemoryModel())
                 }
                 remotePlanet
             }
@@ -60,7 +60,7 @@ class PlanetRepositoryImpl(
     override suspend fun searchPlanets(query: String): Result<List<PlanetDetailsApiModel>> {
         return try {
             require(query.isNotBlank()) { "Search query cannot be blank" }
-            val allPlanets = planetDataSource.getAllPlanets()
+            val allPlanets = localSource.getAllPlanets()
             val filteredPlanets = allPlanets.filter { planet ->
                 planet.name.contains(query, ignoreCase = true)
             }
