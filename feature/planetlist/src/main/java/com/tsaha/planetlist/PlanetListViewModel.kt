@@ -2,9 +2,9 @@ package com.tsaha.planetlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.planetlist.NavEvent.*
+import com.tsaha.planetlist.mapper.toUiState
 import com.tsaha.planetlist.model.PlanetListUiState
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ class PlanetListViewModel(
                     planetListUseCase.searchPlanets(query)
                 }
             }
+            .map { planetListResult -> planetListResult.toUiState() }
             .stateIn(
                 viewModelScope,
                 started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),

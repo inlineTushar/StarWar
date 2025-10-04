@@ -1,9 +1,8 @@
 package com.tsaha.planetlist.model
 
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.*
+import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 
 sealed class PlanetListUiState {
     data object ListLoading : PlanetListUiState()

@@ -1,18 +1,11 @@
 package com.tsaha.planetlist
 
 import com.tsaha.nucleus.core.network.PAGE_SIZE
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.repository.PlanetRepository
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
-import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
-import com.tsaha.planetlist.model.PlanetItem
-import com.tsaha.planetlist.model.PlanetListUiState
-import com.tsaha.planetlist.model.PlanetListUiState.ListError
-import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
-import com.tsaha.planetlist.model.PlanetListUiState.ListSuccess
-import com.tsaha.planetlist.model.PlanetListUiState.SearchResult
+import com.tsaha.planetlist.domain.model.PlanetDetailsState
+import com.tsaha.planetlist.domain.model.PlanetListResult
+import com.tsaha.planetlist.domain.model.PlanetWithDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -22,17 +15,29 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
+/**
+ * Domain use case for planet list operations.
+ * This class is UI-agnostic and returns domain-specific models.
+ * The ViewModel layer is responsible for mapping these to UI states.
+ */
 class PlanetListUseCase(
     private val planetRepository: PlanetRepository
 ) {
+    /**
+     * Observes planet list with pagination support.
+     *
+     * @param loadNextFlow Flow emitting page numbers to load
+     * @param pageSize Number of items to fetch details for per page
+     * @return Flow of domain-specific planet list results
+     */
     fun observePlanets(
         loadNextFlow: Flow<Int>,
         pageSize: Int = PAGE_SIZE
-    ): Flow<PlanetListUiState> = flow {
-        emit(ListLoading)
+    ): Flow<PlanetListResult> = flow {
+        emit(PlanetListResult.Loading)
         var hasNext = true
         var currentPlanets = mutableListOf<Planet>()
-        var currentPlanetItems = mutableListOf<PlanetItem>()
+        var currentPlanetItems = mutableListOf<PlanetWithDetails>()
 
         loadNextFlow
             .buffer(capacity = 0, onBufferOverflow = BufferOverflow.DROP_LATEST)
@@ -47,21 +52,21 @@ class PlanetListUseCase(
 
                         if (currentPlanets.isEmpty()) {
                             val msg = planetsResult.exceptionOrNull()?.message
-                            emit(ListError(msg))
+                            emit(PlanetListResult.Error(msg))
                             return@flow
                         }
 
                         currentPlanetItems = currentPlanets.map { planet ->
-                            PlanetItem(
+                            PlanetWithDetails(
                                 planet = planet,
-                                detailsState = DetailsLoading
+                                detailsState = PlanetDetailsState.Loading
                             )
                         }.toMutableList()
                     } else {
                         emit(
-                            ListSuccess(
-                                isPageLoading = true,
-                                planetItems = currentPlanetItems.toList()
+                            PlanetListResult.Success(
+                                items = currentPlanetItems.toList(),
+                                isLoadingNextPage = true
                             )
                         )
                         val planetsResult =
@@ -72,86 +77,125 @@ class PlanetListUseCase(
                         if (newPlanets.isNotEmpty()) {
                             currentPlanets.addAll(newPlanets)
                             val newPlanetItems = newPlanets.map { planet ->
-                                PlanetItem(
+                                PlanetWithDetails(
                                     planet = planet,
-                                    detailsState = DetailsLoading
+                                    detailsState = PlanetDetailsState.Loading
                                 )
                             }.toMutableList()
                             currentPlanetItems.addAll(newPlanetItems)
                         }
                     }
                     emit(
-                        ListSuccess(
-                            isPageLoading = false,
-                            planetItems = currentPlanetItems.toList()
+                        PlanetListResult.Success(
+                            items = currentPlanetItems.toList(),
+                            isLoadingNextPage = false
                         )
                     )
                 }
-            }.collect { uiState ->
-                if (uiState is ListSuccess) {
-                    val indexByPlanetItemId =
+            }.collect { result ->
+                if (result is PlanetListResult.Success) {
+                    val indexByPlanetId =
                         currentPlanets
                             .toList()
                             .mapIndexed { idx, planet -> planet.uid to idx }.toMap()
 
-                    uiState
-                        .planetItems
+                    result
+                        .items
                         .takeLast(pageSize)
                         .asFlow()
                         .flatMapMerge { item ->
                             flow {
-                                val planetDetails =
-                                    planetRepository.getPlanet(item.planet.uid).getOrNull()
-                                        ?.let { DetailsSuccess(it) }
-                                        ?: DetailsError()
-                                emit(item to planetDetails)
+                                val detailsState = planetRepository.getPlanet(item.planet.uid)
+                                    .fold(
+                                        onSuccess = { details ->
+                                            PlanetDetailsState.Available(
+                                                climate = details.climate,
+                                                population = details.population,
+                                                diameter = details.diameter,
+                                                gravity = details.gravity,
+                                                terrain = details.terrain
+                                            )
+                                        },
+                                        onFailure = { exception ->
+                                            PlanetDetailsState.Error(exception.message)
+                                        }
+                                    )
+                                emit(item to detailsState)
                             }
                         }
-                        .collect { (item, planetDetails) ->
-                            indexByPlanetItemId[item.planet.uid]?.let { idx ->
-                                if (currentPlanetItems[idx].detailsState is DetailsLoading) {
+                        .collect { (item, detailsState) ->
+                            indexByPlanetId[item.planet.uid]?.let { idx ->
+                                if (currentPlanetItems[idx].detailsState is PlanetDetailsState.Loading) {
                                     currentPlanetItems[idx] =
-                                        currentPlanetItems[idx].copy(detailsState = planetDetails)
-                                    emit(ListSuccess(planetItems = currentPlanetItems.toList()))
-                                } else emit(uiState)
+                                        currentPlanetItems[idx].copy(detailsState = detailsState)
+                                    emit(
+                                        PlanetListResult.Success(
+                                            items = currentPlanetItems.toList(),
+                                            isLoadingNextPage = false
+                                        )
+                                    )
+                                } else emit(result)
                             }
                         }
-                } else emit(uiState)
+                } else emit(result)
             }
     }.flowOn(Dispatchers.IO)
 
-    fun searchPlanets(query: String): Flow<PlanetListUiState> = flow {
-        emit(SearchResult(planetItems = emptyList(), searchQuery = query, isSearching = true))
+    /**
+     * Searches planets by name.
+     *
+     * @param query Search query string
+     * @return Flow of domain-specific search results
+     */
+    fun searchPlanets(query: String): Flow<PlanetListResult> = flow {
+        emit(
+            PlanetListResult.SearchResult(
+                items = emptyList(),
+                query = query,
+                isSearching = true
+            )
+        )
 
         if (query.isBlank()) {
-            emit(SearchResult(planetItems = emptyList(), searchQuery = query, isSearching = false))
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = false
+                )
+            )
             return@flow
         }
 
         val searchResult = planetRepository.searchPlanets(query)
         searchResult.fold(
             onSuccess = { planetDetailsList ->
-                val searchItems = planetDetailsList.map { planetDetails ->
-                    // Convert PlanetDetails to Planet for consistency
+                val searchItems = planetDetailsList.map { details ->
                     val planet = Planet(
-                        uid = planetDetails.uid,
-                        name = planetDetails.name
+                        uid = details.uid,
+                        name = details.name
                     )
-                    PlanetItem(
+                    PlanetWithDetails(
                         planet = planet,
-                        detailsState = DetailsSuccess(planetDetails)
+                        detailsState = PlanetDetailsState.Available(
+                            climate = details.climate,
+                            population = details.population,
+                            diameter = details.diameter,
+                            gravity = details.gravity,
+                            terrain = details.terrain
+                        )
                     )
                 }
                 emit(
-                    SearchResult(
-                        planetItems = searchItems,
-                        searchQuery = query,
+                    PlanetListResult.SearchResult(
+                        items = searchItems,
+                        query = query,
                         isSearching = false
                     )
                 )
             },
             onFailure = { exception ->
-                emit(ListError(exception.message))
+                emit(PlanetListResult.Error(exception.message))
             }
         )
     }.flowOn(Dispatchers.IO)
