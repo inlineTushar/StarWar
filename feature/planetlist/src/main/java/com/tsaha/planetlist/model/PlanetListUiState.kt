@@ -1,6 +1,7 @@
 package com.tsaha.planetlist.model
 
-import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.*
 
@@ -20,6 +21,6 @@ sealed class PlanetListUiState {
 }
 
 data class PlanetItem(
-    val planet: PlanetApiModel,
+    val planet: Planet,
     val detailsState: PlanetDetailsUiState = DetailsLoading
 )

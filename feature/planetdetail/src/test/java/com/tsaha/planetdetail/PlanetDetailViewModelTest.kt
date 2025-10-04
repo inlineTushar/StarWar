@@ -7,7 +7,9 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isSameAs
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import kotlinx.coroutines.Dispatchers
@@ -323,12 +325,12 @@ class PlanetDetailViewModelTest {
         }
 
         override suspend fun getPlanetsWithPagination(pageNumber: Int, limit: Int) =
-            Result.failure<Pair<com.tsaha.nucleus.data.model.PaginationApiModel, List<com.tsaha.nucleus.data.model.PlanetApiModel>>>(
+            Result.failure<Pair<PaginationApiModel, List<PlanetApiModel>>>(
                 RuntimeException("Not used in detail view")
             )
 
         override suspend fun getPlanetsWithPagination(limit: Int) =
-            Result.failure<Pair<com.tsaha.nucleus.data.model.PaginationApiModel, List<com.tsaha.nucleus.data.model.PlanetApiModel>>>(
+            Result.failure<Pair<PaginationApiModel, List<PlanetApiModel>>>(
                 RuntimeException("Not used in detail view")
             )
 

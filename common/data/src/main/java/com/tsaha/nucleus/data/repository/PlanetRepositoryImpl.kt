@@ -1,12 +1,13 @@
 package com.tsaha.nucleus.data.repository
 
+import com.tsaha.nucleus.data.asMemoryPlanetDetails
+import com.tsaha.nucleus.data.asPaginationPlanetPair
+import com.tsaha.nucleus.data.asPlanetDetails
 import com.tsaha.nucleus.data.datasource.local.runtimememory.PlanetLocalDataSource
 import com.tsaha.nucleus.data.datasource.remote.PlanetRemoteDataSource
-import com.tsaha.nucleus.data.model.PaginationApiModel
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
-import com.tsaha.nucleus.data.model.asApiModel
-import com.tsaha.nucleus.data.model.asMemoryModel
+import com.tsaha.nucleus.data.model.Pagination
+import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetails
 
 /**
  * Implementation of PlanetRepository using remote API
@@ -21,11 +22,11 @@ class PlanetRepositoryImpl(
     override suspend fun getPlanetsWithPagination(
         pageNumber: Int,
         limit: Int
-    ): Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
+    ): Result<Pair<Pagination, List<Planet>>> {
         return try {
             require(pageNumber >= 1) { "Page number must be >= 1" }
             require(limit > 0) { "Limit must be > 0" }
-            remoteSource.getPlanets(pageNumber, limit)
+            remoteSource.getPlanets(pageNumber, limit).asPaginationPlanetPair()
         } catch (e: IllegalArgumentException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -34,21 +35,21 @@ class PlanetRepositoryImpl(
     }
 
     override suspend fun getPlanetsWithPagination(limit: Int):
-            Result<Pair<PaginationApiModel, List<PlanetApiModel>>> {
+            Result<Pair<Pagination, List<Planet>>> {
         return getPlanetsWithPagination(pageNumber = 1, limit = limit)
     }
 
-    override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
+    override suspend fun getPlanet(id: String): Result<PlanetDetails> {
         return try {
             require(id.isNotBlank()) { "Planet ID cannot be blank" }
             localSource.getPlanet(planetId = id)?.let { storedPlanet ->
-                Result.success(storedPlanet.asApiModel())
+                Result.success(storedPlanet.asPlanetDetails())
             } ?: run {
                 val remotePlanet = remoteSource.getPlanet(id)
                 remotePlanet.onSuccess { planetDetails ->
-                    localSource.storePlanet(planetDetails.asMemoryModel())
+                    localSource.storePlanet(planetDetails.asMemoryPlanetDetails())
                 }
-                remotePlanet
+                remotePlanet.asPlanetDetails()
             }
         } catch (e: IllegalArgumentException) {
             Result.failure(e)
@@ -57,15 +58,15 @@ class PlanetRepositoryImpl(
         }
     }
 
-    override suspend fun searchPlanets(query: String): Result<List<PlanetDetailsApiModel>> {
+    override suspend fun searchPlanets(query: String): Result<List<PlanetDetails>> {
         return try {
             require(query.isNotBlank()) { "Search query cannot be blank" }
             val allPlanets = localSource.getAllPlanets()
             val filteredPlanets = allPlanets.filter { planet ->
                 planet.name.contains(query, ignoreCase = true)
             }
-            val filteredPlanetsApiModels = filteredPlanets.map { it.asApiModel() }
-            Result.success(filteredPlanetsApiModels)
+            val filteredPlanetsDetails = filteredPlanets.map { it.asPlanetDetails() }
+            Result.success(filteredPlanetsDetails)
         } catch (e: IllegalArgumentException) {
             Result.failure(e)
         } catch (e: Exception) {

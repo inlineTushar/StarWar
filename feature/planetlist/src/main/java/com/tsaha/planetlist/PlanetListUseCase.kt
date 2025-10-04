@@ -1,7 +1,8 @@
 package com.tsaha.planetlist
 
 import com.tsaha.nucleus.core.network.PAGE_SIZE
-import com.tsaha.nucleus.data.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
@@ -30,7 +31,7 @@ class PlanetListUseCase(
     ): Flow<PlanetListUiState> = flow {
         emit(ListLoading)
         var hasNext = true
-        var currentPlanets = mutableListOf<PlanetApiModel>()
+        var currentPlanets = mutableListOf<Planet>()
         var currentPlanetItems = mutableListOf<PlanetItem>()
 
         loadNextFlow
@@ -132,7 +133,7 @@ class PlanetListUseCase(
             onSuccess = { planetDetailsList ->
                 val searchItems = planetDetailsList.map { planetDetails ->
                     // Convert PlanetDetails to Planet for consistency
-                    val planet = PlanetApiModel(
+                    val planet = Planet(
                         uid = planetDetails.uid,
                         name = planetDetails.name
                     )

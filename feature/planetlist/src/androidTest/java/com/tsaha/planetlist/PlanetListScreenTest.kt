@@ -9,8 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem

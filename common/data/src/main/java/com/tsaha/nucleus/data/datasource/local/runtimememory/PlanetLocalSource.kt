@@ -1,6 +1,6 @@
 package com.tsaha.nucleus.data.datasource.local.runtimememory
 
-import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
+import com.tsaha.nucleus.data.datasource.local.runtimememory.model.PlanetDetailsMemoryModel
 
 /**
  * Data source interface for storing and retrieving planet details by ID

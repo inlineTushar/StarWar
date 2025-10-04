@@ -1,10 +1,10 @@
 package com.tsaha.nucleus.data.datasource.remote.api
 
-import com.tsaha.nucleus.data.model.PaginationApiModel
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
-import com.tsaha.nucleus.data.model.PlanetsApiResponse
-import com.tsaha.nucleus.data.model.PlanetDetailApiResponse
+import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetsApiResponse
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

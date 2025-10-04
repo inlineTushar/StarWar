@@ -6,9 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.PaginationApiModel
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading

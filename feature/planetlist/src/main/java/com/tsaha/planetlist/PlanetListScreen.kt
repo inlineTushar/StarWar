@@ -24,8 +24,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.tsaha.feature.planetlist.R
 import com.tsaha.navigation.Route
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
@@ -89,7 +91,7 @@ private fun PlanetListComposable(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
-    onClickPlanet: (PlanetApiModel) -> Unit,
+    onClickPlanet: (Planet) -> Unit,
     listState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -263,19 +265,19 @@ private fun PlanetListComposableSuccessPreview() {
             state = ListSuccess(
                 planetItems = listOf(
                     PlanetItem(
-                        planet = PlanetApiModel(
+                        planet = Planet(
                             uid = "1",
                             name = "Earth"
                         ),
                         detailsState = DetailsLoading
                     ),
                     PlanetItem(
-                        planet = PlanetApiModel(
+                        planet = Planet(
                             uid = "2",
                             name = "Mars"
                         ),
                         detailsState = DetailsSuccess(
-                            details = PlanetDetailsApiModel(
+                            details = PlanetDetails(
                                 uid = "2",
                                 name = "Mars",
                                 climate = "Cold",
@@ -305,12 +307,12 @@ private fun PlanetListComposableSearchPreview() {
             state = SearchResult(
                 planetItems = listOf(
                     PlanetItem(
-                        planet = PlanetApiModel(
+                        planet = Planet(
                             uid = "1",
                             name = "Tatooine"
                         ),
                         detailsState = DetailsSuccess(
-                            details = PlanetDetailsApiModel(
+                            details = PlanetDetails(
                                 uid = "1",
                                 name = "Tatooine",
                                 climate = "Arid",

@@ -24,7 +24,6 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsError
 import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsLoading
@@ -32,6 +31,7 @@ import com.tsaha.nucleus.ui.PlanetDetailsUiState.DetailsSuccess
 import com.tsaha.nucleus.ui.component.ErrorComposable
 import com.tsaha.nucleus.ui.component.NucleusAppBar
 import androidx.compose.foundation.layout.height
+import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.component.PlanetComposable
 import com.tsaha.nucleus.ui.component.PlanetNameComposable
 import com.tsaha.nucleus.ui.component.ProgressBarComposable
@@ -109,7 +109,7 @@ private fun PlanetDetailsComposable(
 
 @Composable
 private fun PlanetInfoComposable(
-    planet: PlanetDetailsApiModel,
+    planet: PlanetDetails,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -180,7 +180,7 @@ private fun PlanetDetailScreenPreview() {
     NucleusTheme {
         PlanetDetailsComposable(
             state = DetailsSuccess(
-                details = PlanetDetailsApiModel(
+                details = PlanetDetails(
                     uid = "1",
                     name = "Tatooine",
                     climate = "Arid",

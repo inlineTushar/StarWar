@@ -1,4 +1,4 @@
-package com.tsaha.nucleus.data.model
+package com.tsaha.nucleus.data.datasource.remote.model
 
 import kotlinx.serialization.Serializable
 

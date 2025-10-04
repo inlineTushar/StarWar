@@ -1,6 +1,6 @@
 package com.tsaha.nucleus.data.datasource.local.runtimememory
 
-import com.tsaha.nucleus.data.model.PlanetDetailsMemoryModel
+import com.tsaha.nucleus.data.datasource.local.runtimememory.model.PlanetDetailsMemoryModel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap

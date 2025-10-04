@@ -1,9 +1,9 @@
 package com.tsaha.nucleus.data.datasource.remote
 
 import com.tsaha.nucleus.data.datasource.remote.api.PlanetApi
-import com.tsaha.nucleus.data.model.PaginationApiModel
-import com.tsaha.nucleus.data.model.PlanetApiModel
-import com.tsaha.nucleus.data.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
+import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
 
 class PlanetRemoteDataSource(private val planetApi: PlanetApi) {
 
