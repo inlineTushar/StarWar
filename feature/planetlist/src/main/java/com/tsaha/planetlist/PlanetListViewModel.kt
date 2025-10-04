@@ -3,6 +3,7 @@ package com.tsaha.planetlist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.domain.PlanetListUseCase
 import com.tsaha.planetlist.NavEvent.*
 import com.tsaha.planetlist.mapper.toUiState
 import com.tsaha.planetlist.model.PlanetListUiState

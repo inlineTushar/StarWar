@@ -30,6 +30,7 @@ class AndroidAppConventionPlugin : Plugin<Project> {
                 "implementation"(project(":common:navigation"))
                 "implementation"(project(":common:ui"))
                 "implementation"(project(":common:data"))
+                "implementation"(project(":common:domain"))
 
                 // Core Android dependencies
                 "implementation"(libs.findLibrary("androidx.core.ktx").get())

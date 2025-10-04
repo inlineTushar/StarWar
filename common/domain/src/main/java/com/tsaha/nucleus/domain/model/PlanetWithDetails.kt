@@ -1,4 +1,4 @@
-package com.tsaha.planetlist.domain.model
+package com.tsaha.nucleus.domain.model
 
 import com.tsaha.nucleus.data.model.Planet
 

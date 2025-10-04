@@ -1,4 +1,4 @@
-package com.tsaha.planetlist.domain.model
+package com.tsaha.nucleus.domain.model
 
 /**
  * Domain model representing the result of planet list operations.

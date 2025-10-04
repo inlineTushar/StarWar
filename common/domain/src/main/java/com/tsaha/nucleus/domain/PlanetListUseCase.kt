@@ -1,11 +1,11 @@
-package com.tsaha.planetlist
+package com.tsaha.nucleus.domain
 
 import com.tsaha.nucleus.core.network.PAGE_SIZE
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.repository.PlanetRepository
-import com.tsaha.planetlist.domain.model.PlanetDetailsState
-import com.tsaha.planetlist.domain.model.PlanetListResult
-import com.tsaha.planetlist.domain.model.PlanetWithDetails
+import com.tsaha.nucleus.domain.model.PlanetDetailsState
+import com.tsaha.nucleus.domain.model.PlanetListResult
+import com.tsaha.nucleus.domain.model.PlanetWithDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
