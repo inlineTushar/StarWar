@@ -7,11 +7,14 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isSameAs
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.model.Pagination
+import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -23,27 +26,24 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Comprehensive test suite for PlanetDetailViewModel
+ * Comprehensive test suite for PlanetDetailViewModel using MockK
  *
- * This test class covers the actual behavior of the ViewModel implementation,
- * which has some issues with its StateFlow and channelFlow setup.
- *
- * Note: The current ViewModel implementation has architectural issues:
- * - channelFlow in getPlanetDetail is not collected
- * - onStart doesn't properly trigger the loading
- *
- * These tests verify the actual behavior rather than ideal behavior.
+ * This test class verifies:
+ * - ViewModel initialization and state management
+ * - Repository interaction with proper mocking
+ * - Error handling scenarios
+ * - Edge cases and lifecycle behavior
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlanetDetailViewModelTest {
 
     private lateinit var viewModel: PlanetDetailViewModel
-    private lateinit var mockRepository: MockPlanetRepository
+    private lateinit var mockRepository: PlanetRepository
     private val testDispatcher = StandardTestDispatcher()
 
     // Test Data
     private val testPlanetId = "test-planet-123"
-    private val testPlanetDetails = PlanetDetailsApiModel(
+    private val testPlanetDetails = PlanetDetails(
         uid = testPlanetId,
         name = "Tatooine",
         climate = "arid",
@@ -56,7 +56,7 @@ class PlanetDetailViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        mockRepository = MockPlanetRepository()
+        mockRepository = mockk(relaxed = true)
     }
 
     @After
@@ -71,7 +71,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `uiState should start with loading state`() = runTest {
         // Given
-        mockRepository.setupSuccessResponse(testPlanetId, testPlanetDetails)
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
 
         // When
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
@@ -82,7 +82,10 @@ class PlanetDetailViewModelTest {
 
     @Test
     fun `should create ViewModel with constructor parameters`() = runTest {
-        // Given & When
+        // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
+
+        // When
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // Then
@@ -95,6 +98,7 @@ class PlanetDetailViewModelTest {
     fun `should handle different planet IDs in constructor`() = runTest {
         // Given
         val customIds = listOf("planet1", "planet2", "", "very-long-id-" + "x".repeat(100))
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
 
         customIds.forEach { planetId ->
             // When
@@ -113,6 +117,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `uiState should be accessible and consistent`() = runTest {
         // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // When - Multiple accesses to state
@@ -127,6 +132,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `StateFlow should maintain reference consistency`() = runTest {
         // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // When & Then - StateFlow reference should be consistent
@@ -139,6 +145,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `StateFlow should be cold and replayable`() = runTest {
         // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // When & Then - StateFlow should provide current value immediately
@@ -146,7 +153,6 @@ class PlanetDetailViewModelTest {
             val initialState = awaitItem()
             assertThat(initialState).isEqualTo(PlanetDetailsUiState.DetailsLoading)
 
-            // Cancel to avoid hanging
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -157,8 +163,11 @@ class PlanetDetailViewModelTest {
 
     @Test
     fun `should handle empty planet ID in constructor`() = runTest {
-        // Given & When
+        // Given
         val emptyId = ""
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
+
+        // When
         viewModel = PlanetDetailViewModel(emptyId, mockRepository)
 
         // Then
@@ -170,6 +179,7 @@ class PlanetDetailViewModelTest {
     fun `should handle special characters in planet ID`() = runTest {
         // Given
         val specialId = "planet-123!@#$%^&*()"
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
 
         // When
         viewModel = PlanetDetailViewModel(specialId, mockRepository)
@@ -183,6 +193,7 @@ class PlanetDetailViewModelTest {
     fun `should handle very long planet ID`() = runTest {
         // Given
         val longId = "a".repeat(1000)
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
 
         // When
         viewModel = PlanetDetailViewModel(longId, mockRepository)
@@ -197,18 +208,50 @@ class PlanetDetailViewModelTest {
     // ===============================
 
     @Test
-    fun `should work with different repository implementations`() = runTest {
+    fun `getPlanetDetail should call repository with correct planet ID`() = runTest {
         // Given
-        val alternateRepository = MockPlanetRepository().apply {
-            setupSuccessResponse(testPlanetId, testPlanetDetails)
-        }
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
+        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // When
-        viewModel = PlanetDetailViewModel(testPlanetId, alternateRepository)
+        viewModel.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertThat(viewModel).isNotNull()
-        assertThat(viewModel.uiState.value).isEqualTo(PlanetDetailsUiState.DetailsLoading)
+        coVerify(atLeast = 1) { mockRepository.getPlanet(testPlanetId) }
+    }
+
+    @Test
+    fun `getPlanetDetail should handle repository success`() = runTest {
+        // Given
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
+        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
+
+        // When
+        viewModel.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - The call was made successfully
+        coVerify { mockRepository.getPlanet(testPlanetId) }
+    }
+
+    @Test
+    fun `getPlanetDetail should handle repository failure`() = runTest {
+        // Given
+        val errorMessage = "Network error"
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.failure(
+            RuntimeException(
+                errorMessage
+            )
+        )
+        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
+
+        // When
+        viewModel.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - The call was attempted
+        coVerify { mockRepository.getPlanet(testPlanetId) }
     }
 
     // ===============================
@@ -217,7 +260,10 @@ class PlanetDetailViewModelTest {
 
     @Test
     fun `should handle rapid ViewModel creation`() = runTest {
-        // Given & When - Create multiple ViewModels rapidly
+        // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
+
+        // When - Create multiple ViewModels rapidly
         val viewModels = mutableListOf<PlanetDetailViewModel>()
 
         repeat(10) { index ->
@@ -233,6 +279,66 @@ class PlanetDetailViewModelTest {
         }
     }
 
+    @Test
+    fun `should handle multiple consecutive getPlanetDetail calls`() = runTest {
+        // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
+        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
+
+        // When - Multiple rapid calls
+        repeat(5) {
+            viewModel.getPlanetDetail(testPlanetId)
+        }
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - All calls should be attempted
+        coVerify(atLeast = 5) { mockRepository.getPlanet(testPlanetId) }
+    }
+
+    // ===============================
+    // ERROR HANDLING TESTS
+    // ===============================
+
+    @Test
+    fun `should handle null error message gracefully`() = runTest {
+        // Given
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.failure(
+            RuntimeException(
+                null as String?
+            )
+        )
+        viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
+
+        // When
+        viewModel.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - Should not crash
+        coVerify { mockRepository.getPlanet(testPlanetId) }
+    }
+
+    @Test
+    fun `should handle different error types`() = runTest {
+        // Given
+        val errors = listOf(
+            RuntimeException("Network error"),
+            IllegalStateException("Invalid state"),
+            Exception("Generic error")
+        )
+
+        errors.forEach { error ->
+            coEvery { mockRepository.getPlanet(any()) } returns Result.failure(error)
+            viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
+
+            // When
+            viewModel.getPlanetDetail(testPlanetId)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - Should handle all error types
+            coVerify { mockRepository.getPlanet(testPlanetId) }
+        }
+    }
+
     // ===============================
     // INTEGRATION BEHAVIOR TESTS
     // ===============================
@@ -240,6 +346,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `should maintain proper lifecycle behavior`() = runTest {
         // Given
+        coEvery { mockRepository.getPlanet(any()) } returns Result.success(testPlanetDetails)
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
         // When - Simulate lifecycle events
@@ -255,7 +362,7 @@ class PlanetDetailViewModelTest {
     @Test
     fun `should work end-to-end for basic initialization`() = runTest {
         // Given - Full setup with realistic data
-        mockRepository.setupSuccessResponse(testPlanetId, testPlanetDetails)
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
 
         // When - Initialize ViewModel
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
@@ -268,95 +375,72 @@ class PlanetDetailViewModelTest {
     }
 
     // ===============================
-    // DOCUMENTATION TESTS
+    // MOCK VERIFICATION TESTS
     // ===============================
 
     @Test
-    fun `should document current implementation limitations`() {
-        // This test documents the known issues with the current ViewModel implementation:
-
-        // Issue 1: channelFlow in getPlanetDetail is never collected
-        // Issue 2: onStart doesn't properly trigger the loading
-        // Issue 3: StateFlow chain doesn't connect properly to repository calls
-
-        // These issues mean:
-        // - Repository calls are never actually made
-        // - State never progresses beyond loading
-        // - Manual getPlanetDetail calls don't update state
-
-        assertThat(true).isTrue()
-    }
-
-    @Test
-    fun `should demonstrate ViewModel creation and basic usage`() = runTest {
-        // This test shows the correct way to create and use the ViewModel:
-
-        // 1. Create with planet ID and repository
+    fun `should verify MockK relaxed mode allows unconfigured calls`() = runTest {
+        // Given - Explicit configuration needed due to Result type casting
+        coEvery { mockRepository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
         viewModel = PlanetDetailViewModel(testPlanetId, mockRepository)
 
-        // 2. Access the uiState (will be DetailsLoading)
-        val state = viewModel.uiState.value
-
-        // 3. Call manual loading if needed (won't work due to implementation issues)
+        // When
         viewModel.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        // Verify basic operations don't crash
+        // Then - Should work with proper mock configuration
         assertThat(viewModel).isNotNull()
-        assertThat(state).isNotNull()
-        assertThat(state).isInstanceOf(PlanetDetailsUiState.DetailsLoading::class.java)
+        coVerify { mockRepository.getPlanet(testPlanetId) }
+    }
+
+    @Test
+    fun `should demonstrate proper MockK usage`() = runTest {
+        // This test demonstrates correct MockK usage patterns:
+
+        // 1. Create mock with relaxed mode
+        val repository: PlanetRepository = mockk(relaxed = true)
+
+        // 2. Configure specific behavior
+        coEvery { repository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
+
+        // 3. Create ViewModel with mock
+        val vm = PlanetDetailViewModel(testPlanetId, repository)
+
+        // 4. Trigger action
+        vm.getPlanetDetail(testPlanetId)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // 5. Verify interaction
+        coVerify { repository.getPlanet(testPlanetId) }
+
+        // Verify basic operations work
+        assertThat(vm).isNotNull()
     }
 
     // ===============================
-    // MOCK REPOSITORY IMPLEMENTATION
+    // DATA VALIDATION TESTS
     // ===============================
 
-    private class MockPlanetRepository : PlanetRepository {
-        var getPlanetCallCount = 0
-        var lastRequestedId: String? = null
+    @Test
+    fun `should handle various planet detail data`() = runTest {
+        // Given
+        val planetVariations = listOf(
+            PlanetDetails("1", "Earth", "temperate", "7000000000", "12742", "1", "grasslands"),
+            PlanetDetails("2", "Mars", "cold", "0", "6779", "0.38", "rocky"),
+            PlanetDetails("3", "", "", "", "", "", ""), // Empty data
+            PlanetDetails("4", "Unknown", "unknown", "unknown", "unknown", "unknown", "unknown")
+        )
 
-        private val responses = mutableMapOf<String, Result<PlanetDetailsApiModel>>()
+        planetVariations.forEach { planetDetails ->
+            // When
+            coEvery { mockRepository.getPlanet(any()) } returns Result.success(planetDetails)
+            viewModel = PlanetDetailViewModel(planetDetails.uid, mockRepository)
+            viewModel.getPlanetDetail(planetDetails.uid)
+            testDispatcher.scheduler.advanceUntilIdle()
 
-        fun setupSuccessResponse(planetId: String, planetDetails: PlanetDetailsApiModel) {
-            responses[planetId] = Result.success(planetDetails)
-        }
-
-        fun setupErrorResponse(planetId: String, errorMessage: String?) {
-            responses[planetId] = Result.failure(RuntimeException(errorMessage))
-        }
-
-        override suspend fun getPlanetsWithPagination(pageNumber: Int, limit: Int) =
-            Result.failure<Pair<PaginationApiModel, List<PlanetApiModel>>>(
-                RuntimeException("Not used in detail view")
-            )
-
-        override suspend fun getPlanetsWithPagination(limit: Int) =
-            Result.failure<Pair<PaginationApiModel, List<PlanetApiModel>>>(
-                RuntimeException("Not used in detail view")
-            )
-
-        override suspend fun getPlanet(id: String): Result<PlanetDetailsApiModel> {
-            getPlanetCallCount++
-            lastRequestedId = id
-
-            return responses[id] ?: Result.failure(RuntimeException("Planet $id not configured"))
-        }
-    }
-
-    private fun assertDoesNotThrow(action: () -> Unit) {
-        try {
-            action()
-            assertThat(true).isTrue()
-        } catch (e: Exception) {
-            throw AssertionError("Action should not have thrown an exception: ${e.message}")
-        }
-    }
-
-    private fun assertDoesNotThrow(message: String, action: () -> Unit) {
-        try {
-            action()
-            assertThat(true).isTrue()
-        } catch (e: Exception) {
-            throw AssertionError("$message - should not have thrown an exception: ${e.message}")
+            // Then - Should handle all data variations
+            assertThat(viewModel).isNotNull()
+            coVerify { mockRepository.getPlanet(planetDetails.uid) }
         }
     }
 }

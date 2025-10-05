@@ -9,8 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
+import com.tsaha.nucleus.data.model.Planet
+import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState
 import com.tsaha.nucleus.ui.theme.NucleusTheme
 import com.tsaha.planetlist.model.PlanetItem
@@ -46,9 +46,9 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         val testPlanets = listOf(
             PlanetItem(
-                planet = PlanetApiModel(uid = "1", name = "Tatooine"),
+                planet = Planet(uid = "1", name = "Tatooine"),
                 detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetailsApiModel(
+                    PlanetDetails(
                         uid = "1",
                         name = "Tatooine",
                         climate = "Arid",
@@ -60,7 +60,7 @@ class PlanetListScreenTest {
                 )
             ),
             PlanetItem(
-                planet = PlanetApiModel(uid = "2", name = "Alderaan"),
+                planet = Planet(uid = "2", name = "Alderaan"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             )
         )
@@ -68,6 +68,8 @@ class PlanetListScreenTest {
         val successState = PlanetListUiState.ListSuccess(testPlanets)
         every { mockViewModel.uiState } returns MutableStateFlow(successState)
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
@@ -89,7 +91,7 @@ class PlanetListScreenTest {
     fun planetListScreen_planetClick_triggersViewModelMethod() {
         // Given
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
-        val testPlanet = PlanetApiModel(uid = "1", name = "Clickable Planet")
+        val testPlanet = Planet(uid = "1", name = "Clickable Planet")
         val testPlanets = listOf(
             PlanetItem(
                 planet = testPlanet,
@@ -100,6 +102,8 @@ class PlanetListScreenTest {
         val successState = PlanetListUiState.ListSuccess(testPlanets)
         every { mockViewModel.uiState } returns MutableStateFlow(successState)
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
@@ -125,6 +129,8 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         every { mockViewModel.uiState } returns MutableStateFlow(PlanetListUiState.ListLoading)
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
@@ -148,6 +154,8 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         every { mockViewModel.uiState } returns MutableStateFlow(PlanetListUiState.ListError("Network error"))
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
@@ -172,6 +180,8 @@ class PlanetListScreenTest {
         val stateFlow = MutableStateFlow<PlanetListUiState>(PlanetListUiState.ListLoading)
         every { mockViewModel.uiState } returns stateFlow
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When - Start with loading
         composeTestRule.setContent {
@@ -190,7 +200,7 @@ class PlanetListScreenTest {
         // When - Change to success state
         val testPlanets = listOf(
             PlanetItem(
-                planet = PlanetApiModel(uid = "1", name = "State Change Planet"),
+                planet = Planet(uid = "1", name = "State Change Planet"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             )
         )
@@ -206,13 +216,13 @@ class PlanetListScreenTest {
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
         val mixedStatePlanets = listOf(
             PlanetItem(
-                planet = PlanetApiModel(uid = "1", name = "Loading Planet"),
+                planet = Planet(uid = "1", name = "Loading Planet"),
                 detailsState = PlanetDetailsUiState.DetailsLoading
             ),
             PlanetItem(
-                planet = PlanetApiModel(uid = "2", name = "Success Planet"),
+                planet = Planet(uid = "2", name = "Success Planet"),
                 detailsState = PlanetDetailsUiState.DetailsSuccess(
-                    PlanetDetailsApiModel(
+                    PlanetDetails(
                         uid = "2",
                         name = "Success Planet",
                         climate = "Temperate",
@@ -224,7 +234,7 @@ class PlanetListScreenTest {
                 )
             ),
             PlanetItem(
-                planet = PlanetApiModel(uid = "3", name = "Error Planet"),
+                planet = Planet(uid = "3", name = "Error Planet"),
                 detailsState = PlanetDetailsUiState.DetailsError("Load failed")
             )
         )
@@ -233,6 +243,8 @@ class PlanetListScreenTest {
             PlanetListUiState.ListSuccess(mixedStatePlanets)
         )
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
@@ -259,13 +271,15 @@ class PlanetListScreenTest {
     fun planetListScreen_navigationIntegration_worksWithNavController() {
         // Given
         val mockViewModel = mockk<PlanetListViewModel>(relaxed = true)
-        val testPlanet = PlanetApiModel(uid = "nav-test", name = "Navigation Planet")
+        val testPlanet = Planet(uid = "nav-test", name = "Navigation Planet")
         every { mockViewModel.uiState } returns MutableStateFlow(
             PlanetListUiState.ListSuccess(
                 listOf(PlanetItem(testPlanet, PlanetDetailsUiState.DetailsLoading))
             )
         )
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         var navControllerCreated = false
 
@@ -294,6 +308,8 @@ class PlanetListScreenTest {
             PlanetListUiState.ListSuccess(emptyList())
         )
         every { mockViewModel.navEvent } returns emptyFlow()
+        every { mockViewModel.searchQuery } returns MutableStateFlow("")
+        every { mockViewModel.isSearchMode } returns MutableStateFlow(false)
 
         // When
         composeTestRule.setContent {
