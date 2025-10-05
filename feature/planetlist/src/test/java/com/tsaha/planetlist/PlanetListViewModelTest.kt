@@ -7,19 +7,19 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
-import com.tsaha.nucleus.data.model.Pagination
 import com.tsaha.nucleus.data.model.Planet
-import com.tsaha.nucleus.data.model.PlanetDetails
-import com.tsaha.nucleus.data.repository.PlanetRepository
 import com.tsaha.nucleus.domain.PlanetListUseCase
 import com.tsaha.nucleus.domain.model.PlanetDetailsState
 import com.tsaha.nucleus.domain.model.PlanetListResult
 import com.tsaha.nucleus.domain.model.PlanetWithDetails
 import com.tsaha.planetlist.model.PlanetListUiState
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -38,12 +38,11 @@ import org.junit.Test
  * - Domain to UI mapping
  * - Edge cases and error handling
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class PlanetListViewModelTest {
 
     private lateinit var viewModel: PlanetListViewModel
-    private lateinit var mockRepository: PlanetRepository
-    private lateinit var useCase: PlanetListUseCase
+    private lateinit var mockUseCase: PlanetListUseCase
     private val testDispatcher = StandardTestDispatcher()
 
     // Test Data
@@ -51,48 +50,52 @@ class PlanetListViewModelTest {
     private val alderaan = Planet(uid = "2", name = "Alderaan")
     private val coruscant = Planet(uid = "3", name = "Coruscant")
 
-    private val tatooineDetails = PlanetDetails(
-        uid = "1",
-        name = "Tatooine",
-        climate = "arid",
-        population = "200000",
-        diameter = "10465",
-        gravity = "1 standard",
-        terrain = "desert"
+    private val tatooineWithDetails = PlanetWithDetails(
+        planet = tatooine,
+        detailsState = PlanetDetailsState.Available(
+            climate = "arid",
+            population = "200000",
+            diameter = "10465",
+            gravity = "1 standard",
+            terrain = "desert"
+        )
     )
 
-    private val alderaanDetails = PlanetDetails(
-        uid = "2",
-        name = "Alderaan",
-        climate = "temperate",
-        population = "2000000000",
-        diameter = "12500",
-        gravity = "1 standard",
-        terrain = "grasslands, mountains"
+    private val alderaanWithDetails = PlanetWithDetails(
+        planet = alderaan,
+        detailsState = PlanetDetailsState.Available(
+            climate = "temperate",
+            population = "2000000000",
+            diameter = "12500",
+            gravity = "1 standard",
+            terrain = "grasslands, mountains"
+        )
     )
-
-    private val paginationNoNext = Pagination(currentPage = 1, nextPage = null)
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        mockRepository = mockk(relaxed = true)
-        useCase = PlanetListUseCase(mockRepository)
+        mockUseCase = mockk(relaxed = true)
 
-        // Setup default mocks
-        coEvery {
-            mockRepository.getPlanetsWithPagination(pageNumber = any(), limit = any())
-        } returns Result.success(paginationNoNext to listOf(tatooine, alderaan))
+        // Setup default mock behavior - observePlanets returns loading then success
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails, alderaanWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
 
-        coEvery {
-            mockRepository.getPlanet(any())
-        } returns Result.success(tatooineDetails)
-
-        coEvery {
-            mockRepository.searchPlanets(any())
-        } returns Result.success(listOf(tatooineDetails))
-
-        viewModel = PlanetListViewModel(useCase)
+        // Setup default mock behavior for search
+        every { mockUseCase.searchPlanets(any()) } returns flowOf(
+            PlanetListResult.SearchResult(
+                items = listOf(tatooineWithDetails),
+                query = "Tatooine",
+                isSearching = false
+            )
+        )
     }
 
     @After
@@ -107,6 +110,7 @@ class PlanetListViewModelTest {
     @Test
     fun `onClickPlanet should emit navigation event with correct UID`() = runTest {
         // Given
+        viewModel = PlanetListViewModel(mockUseCase)
         val testPlanet = tatooine
 
         // When & Then
@@ -124,6 +128,7 @@ class PlanetListViewModelTest {
     @Test
     fun `onClickPlanet should emit correct UID for different planets`() = runTest {
         // Given
+        viewModel = PlanetListViewModel(mockUseCase)
         val planets = listOf(tatooine, alderaan, coruscant)
 
         // When & Then
@@ -142,6 +147,9 @@ class PlanetListViewModelTest {
 
     @Test
     fun `onClickPlanet should handle multiple rapid clicks`() = runTest {
+        // Given
+        viewModel = PlanetListViewModel(mockUseCase)
+
         // When & Then
         viewModel.navEvent.test {
             viewModel.onClickPlanet(tatooine)
@@ -163,6 +171,9 @@ class PlanetListViewModelTest {
 
     @Test
     fun `navEvent should not emit when no planet is clicked`() = runTest {
+        // Given
+        viewModel = PlanetListViewModel(mockUseCase)
+
         // When & Then
         viewModel.navEvent.test {
             expectNoEvents()
@@ -176,6 +187,14 @@ class PlanetListViewModelTest {
     @Test
     fun `onSearchQueryChanged should update search query`() = runTest {
         // Given
+        every { mockUseCase.searchPlanets(any()) } returns flowOf(
+            PlanetListResult.SearchResult(
+                items = listOf(tatooineWithDetails),
+                query = "Tatooine",
+                isSearching = false
+            )
+        )
+        viewModel = PlanetListViewModel(mockUseCase)
         val query = "Tatooine"
 
         // When
@@ -190,22 +209,58 @@ class PlanetListViewModelTest {
     fun `onSearchQueryChanged should trigger search after debounce`() = runTest {
         // Given
         val query = "Tatooine"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.success(listOf(tatooineDetails))
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = true
+                )
+            )
+            emit(
+                PlanetListResult.SearchResult(
+                    items = listOf(tatooineWithDetails),
+                    query = query,
+                    isSearching = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
-        // When
-        viewModel.onSearchQueryChanged(query)
-        testDispatcher.scheduler.advanceTimeBy(350) // After debounce
+        // Use turbine to collect the state which triggers isSearchMode update
+        viewModel.uiState.test {
+            awaitItem() // Initial loading state
 
-        // Then
-        assertThat(viewModel.searchQuery.value).isEqualTo(query)
-        assertThat(viewModel.isSearchMode.value).isTrue()
+            // When
+            viewModel.onSearchQueryChanged(query)
+            testDispatcher.scheduler.advanceTimeBy(350) // After debounce
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Collect the search states
+            awaitItem() // Searching state
+            awaitItem() // Search result state
+
+            // Then
+            assertThat(viewModel.searchQuery.value).isEqualTo(query)
+            assertThat(viewModel.isSearchMode.value).isTrue()
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun `clearSearch should reset search query to empty`() = runTest {
         // Given
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
         viewModel.onSearchQueryChanged("Tatooine")
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -221,16 +276,34 @@ class PlanetListViewModelTest {
     fun `clearSearch should exit search mode`() = runTest {
         // Given
         val query = "Tatooine"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.success(listOf(tatooineDetails))
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = listOf(tatooineWithDetails),
+                    query = query,
+                    isSearching = false
+                )
+            )
+        }
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
         viewModel.onSearchQueryChanged(query)
         testDispatcher.scheduler.advanceTimeBy(350)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // When
         viewModel.clearSearch()
         testDispatcher.scheduler.advanceTimeBy(350)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         assertThat(viewModel.searchQuery.value).isEqualTo("")
@@ -240,12 +313,28 @@ class PlanetListViewModelTest {
     @Test
     fun `search with blank query should return to normal mode`() = runTest {
         // Given
+        every { mockUseCase.searchPlanets(any()) } returns flowOf(
+            PlanetListResult.SearchResult(items = emptyList(), query = "", isSearching = false)
+        )
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
+
         viewModel.onSearchQueryChanged("Tatooine")
         testDispatcher.scheduler.advanceTimeBy(350)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // When
         viewModel.onSearchQueryChanged("   ")
         testDispatcher.scheduler.advanceTimeBy(350)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         assertThat(viewModel.isSearchMode.value).isEqualTo(false)
@@ -253,6 +342,9 @@ class PlanetListViewModelTest {
 
     @Test
     fun `rapid search query changes should debounce correctly`() = runTest {
+        // Given
+        viewModel = PlanetListViewModel(mockUseCase)
+
         // When - Type rapidly
         viewModel.onSearchQueryChanged("T")
         viewModel.onSearchQueryChanged("Ta")
@@ -263,6 +355,7 @@ class PlanetListViewModelTest {
 
         // Wait for debounce
         testDispatcher.scheduler.advanceTimeBy(350)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - Should only search for final query
         assertThat(viewModel.searchQuery.value).isEqualTo("Tatooine")
@@ -274,7 +367,13 @@ class PlanetListViewModelTest {
 
     @Test
     fun `uiState should emit loading state initially`() = runTest {
+        // Given
+        every { mockUseCase.observePlanets(any(), any()) } returns flowOf(
+            PlanetListResult.Loading
+        )
+
         // When
+        viewModel = PlanetListViewModel(mockUseCase)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -285,15 +384,19 @@ class PlanetListViewModelTest {
     @Test
     fun `uiState should transform domain result to UI state`() = runTest {
         // Given
-        coEvery {
-            mockRepository.getPlanetsWithPagination(pageNumber = any(), limit = any())
-        } returns Result.success(paginationNoNext to listOf(tatooine))
-
-        coEvery {
-            mockRepository.getPlanet("1")
-        } returns Result.success(tatooineDetails)
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
 
         // When
+        viewModel = PlanetListViewModel(mockUseCase)
+
         viewModel.uiState.test {
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -311,9 +414,23 @@ class PlanetListViewModelTest {
     fun `uiState should handle search results correctly`() = runTest {
         // Given
         val query = "Tatooine"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.success(listOf(tatooineDetails))
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = true
+                )
+            )
+            emit(
+                PlanetListResult.SearchResult(
+                    items = listOf(tatooineWithDetails),
+                    query = query,
+                    isSearching = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
         // When
         viewModel.uiState.test {
@@ -321,6 +438,7 @@ class PlanetListViewModelTest {
 
             viewModel.onSearchQueryChanged(query)
             testDispatcher.scheduler.advanceTimeBy(350)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             val searchingState = awaitItem() as PlanetListUiState.SearchResult
             assertThat(searchingState.isSearching).isTrue()
@@ -336,9 +454,16 @@ class PlanetListViewModelTest {
     @Test
     fun `onRequestInitialOrNextPage should trigger pagination in non-search mode`() = runTest {
         // Given
-        coEvery {
-            mockRepository.getPlanetsWithPagination(pageNumber = 1, limit = any())
-        } returns Result.success(paginationNoNext to listOf(tatooine))
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(
+                PlanetListResult.Success(
+                    items = listOf(tatooineWithDetails),
+                    isLoadingNextPage = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
         // When
         viewModel.onRequestInitialOrNextPage()
@@ -352,19 +477,36 @@ class PlanetListViewModelTest {
     fun `onRequestInitialOrNextPage should not trigger in search mode`() = runTest {
         // Given
         val query = "Tatooine"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.success(listOf(tatooineDetails))
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = listOf(tatooineWithDetails),
+                    query = query,
+                    isSearching = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
-        viewModel.onSearchQueryChanged(query)
-        testDispatcher.scheduler.advanceTimeBy(350)
+        // Use turbine to collect the state which triggers isSearchMode update
+        viewModel.uiState.test {
+            awaitItem() // Initial loading state
 
-        // When - Try to request next page while in search mode
-        viewModel.onRequestInitialOrNextPage()
-        testDispatcher.scheduler.advanceUntilIdle()
+            viewModel.onSearchQueryChanged(query)
+            testDispatcher.scheduler.advanceTimeBy(350)
+            testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then - Should still be in search mode
-        assertThat(viewModel.isSearchMode.value).isTrue()
+            awaitItem() // Search result state
+
+            // When - Try to request next page while in search mode
+            viewModel.onRequestInitialOrNextPage()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - Should still be in search mode
+            assertThat(viewModel.isSearchMode.value).isTrue()
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     // ===============================
@@ -374,11 +516,14 @@ class PlanetListViewModelTest {
     @Test
     fun `viewModel should handle empty planet list`() = runTest {
         // Given
-        coEvery {
-            mockRepository.getPlanetsWithPagination(pageNumber = any(), limit = any())
-        } returns Result.success(paginationNoNext to emptyList())
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(PlanetListResult.Error("No planets found"))
+        }
 
         // When
+        viewModel = PlanetListViewModel(mockUseCase)
+
         viewModel.uiState.test {
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -396,11 +541,14 @@ class PlanetListViewModelTest {
     fun `viewModel should handle repository failure`() = runTest {
         // Given
         val errorMessage = "Network error"
-        coEvery {
-            mockRepository.getPlanetsWithPagination(pageNumber = any(), limit = any())
-        } returns Result.failure(RuntimeException(errorMessage))
+        every { mockUseCase.observePlanets(any(), any()) } returns flow {
+            emit(PlanetListResult.Loading)
+            emit(PlanetListResult.Error(errorMessage))
+        }
 
         // When
+        viewModel = PlanetListViewModel(mockUseCase)
+
         viewModel.uiState.test {
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -418,9 +566,23 @@ class PlanetListViewModelTest {
     fun `viewModel should handle search with no results`() = runTest {
         // Given
         val query = "NonExistentPlanet"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.success(emptyList())
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = true
+                )
+            )
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = false
+                )
+            )
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
         // When
         viewModel.uiState.test {
@@ -428,6 +590,7 @@ class PlanetListViewModelTest {
 
             viewModel.onSearchQueryChanged(query)
             testDispatcher.scheduler.advanceTimeBy(350)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             val searchingState = awaitItem() as PlanetListUiState.SearchResult
             assertThat(searchingState.isSearching).isTrue()
@@ -445,9 +608,17 @@ class PlanetListViewModelTest {
         // Given
         val query = "Tatooine"
         val errorMessage = "Search failed"
-        coEvery {
-            mockRepository.searchPlanets(query)
-        } returns Result.failure(RuntimeException(errorMessage))
+        every { mockUseCase.searchPlanets(query) } returns flow {
+            emit(
+                PlanetListResult.SearchResult(
+                    items = emptyList(),
+                    query = query,
+                    isSearching = true
+                )
+            )
+            emit(PlanetListResult.Error(errorMessage))
+        }
+        viewModel = PlanetListViewModel(mockUseCase)
 
         // When
         viewModel.uiState.test {
@@ -455,6 +626,7 @@ class PlanetListViewModelTest {
 
             viewModel.onSearchQueryChanged(query)
             testDispatcher.scheduler.advanceTimeBy(350)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             awaitItem() // Searching state
             val errorState = awaitItem()
