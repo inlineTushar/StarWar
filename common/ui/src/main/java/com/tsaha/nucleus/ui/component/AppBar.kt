@@ -74,7 +74,6 @@ fun NucleusAppBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Light Mode")
 @Preview(
     showBackground = true,

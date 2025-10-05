@@ -24,8 +24,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.tsaha.feature.planetlist.R
 import com.tsaha.navigation.Route
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
-import com.tsaha.nucleus.data.datasource.remote.model.PlanetDetailsApiModel
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
 import com.tsaha.nucleus.ui.PlanetDetailsUiState

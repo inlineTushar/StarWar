@@ -1,6 +1,5 @@
 package com.tsaha.nucleus.data
 
-import android.R.attr.gravity
 import com.tsaha.nucleus.data.datasource.local.runtimememory.model.PlanetDetailsMemoryModel
 import com.tsaha.nucleus.data.datasource.remote.model.PaginationApiModel
 import com.tsaha.nucleus.data.datasource.remote.model.PlanetApiModel
