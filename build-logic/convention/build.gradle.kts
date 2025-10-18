@@ -46,6 +46,10 @@ gradlePlugin {
             id = libs.plugins.local.android.library.compose.get().pluginId
             implementationClass = "com.tsaha.nucleus.plugin.AndroidLibraryComposeConventionPlugin"
         }
+        register("androidLibraryKoin") {
+            id = libs.plugins.local.android.library.koin.get().pluginId
+            implementationClass = "com.tsaha.nucleus.plugin.AndroidLibraryKoinConventionPlugin"
+        }
         register("androidFeature") {
             id = libs.plugins.local.android.feature.get().pluginId
             implementationClass = "com.tsaha.nucleus.plugin.AndroidLibraryFeatureConventionPlugin"

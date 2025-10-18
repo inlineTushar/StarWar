@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.local.android.library)
+    alias(libs.plugins.local.android.library.koin)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -20,10 +21,8 @@ dependencies {
     api(libs.ktor.client.logging)
     api(libs.ktor.serialization.kotlinx.json)
 
-    // Koin - Dependency Injection (Core dependencies only)
-    api(libs.koin.core)
-    api(libs.koin.android)
-    api(libs.koin.android.compat)
+    // Note: Koin dependencies (koin-core, koin-android, koin-android-compat) 
+    // now provided by local.android.library.koin plugin
 
     // Kotlinx Serialization (needed for Ktor)
     api(libs.kotlinx.serialization)
@@ -36,8 +35,7 @@ dependencies {
     // Testing dependencies
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.koin.test)
-    testImplementation(libs.koin.test.junit4)
+    // Note: koin-test, koin-test-junit4 now provided by local.android.library.koin plugin
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

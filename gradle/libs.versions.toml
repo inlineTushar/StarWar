@@ -85,5 +85,6 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 # Local plugins defined by this project
 local-android-library = { id = "local.android.library" }
 local-android-library-compose = { id = "local.android.library.compose" }
+local-android-library-koin = { id = "local.android.library.koin" }
 local-android-feature = { id = "local.android.feature" }
 local-android-application = { id = "local.android.application" }

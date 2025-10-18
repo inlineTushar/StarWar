@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.local.android.library)
+    alias(libs.plugins.local.android.library.koin)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -16,10 +17,8 @@ dependencies {
     api(libs.androidx.lifecycle.runtime.compose)
     api(libs.androidx.lifecycle.viewmodel.savedstate)
 
-    // Koin - Dependency Injection
-    api(libs.koin.core)
-    api(libs.koin.android)
-    api(libs.koin.android.compat)
+    // Koin - Compose integration (specific to core module)
+    // Note: koin-core, koin-android, koin-android-compat now provided by local.android.library.koin plugin
     api(libs.koin.androidx.compose)
 
     // Ktor - Networking
@@ -41,8 +40,7 @@ dependencies {
     testImplementation(libs.junit)
     api(libs.assertk)
     testImplementation(libs.androidx.lifecycle.viewmodel.testing)
-    testImplementation(libs.koin.test)
-    testImplementation(libs.koin.test.junit4)
+    // Note: koin-test, koin-test-junit4 now provided by local.android.library.koin plugin
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
