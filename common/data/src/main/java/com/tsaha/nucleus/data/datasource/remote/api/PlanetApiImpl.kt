@@ -9,12 +9,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Ktor implementation of PlanetApi
  * @param httpClient The configured HTTP client for making API calls
  */
-class PlanetApiImpl(
+@Singleton
+class PlanetApiImpl @Inject constructor(
     private val httpClient: HttpClient
 ) : PlanetApi {
 

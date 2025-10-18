@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.local.android.library)
+    alias(libs.plugins.local.android.library.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -11,11 +12,6 @@ dependencies {
     // Coroutines - All available coroutines libraries
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
-
-    // Koin - Dependency Injection (Core dependencies only)
-    api(libs.koin.core)
-    api(libs.koin.android)
-    api(libs.koin.android.compat)
 
     // Kotlinx Serialization
     api(libs.kotlinx.serialization)
@@ -33,8 +29,6 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.assertk)
     testImplementation(libs.turbine)
-    testImplementation(libs.koin.test)
-    testImplementation(libs.koin.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

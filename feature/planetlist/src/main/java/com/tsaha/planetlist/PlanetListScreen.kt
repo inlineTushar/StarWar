@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.tsaha.feature.planetlist.R
@@ -43,14 +44,13 @@ import com.tsaha.planetlist.model.PlanetListUiState.ListError
 import com.tsaha.planetlist.model.PlanetListUiState.ListLoading
 import com.tsaha.planetlist.model.PlanetListUiState.ListSuccess
 import com.tsaha.planetlist.model.PlanetListUiState.SearchResult
-import org.koin.androidx.compose.koinViewModel
 import com.tsaha.nucleus.ui.R as CommonR
 
 @Composable
 fun PlanetListScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    vm: PlanetListViewModel = koinViewModel(),
+    vm: PlanetListViewModel = hiltViewModel(),
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val searchQuery by vm.searchQuery.collectAsStateWithLifecycle()

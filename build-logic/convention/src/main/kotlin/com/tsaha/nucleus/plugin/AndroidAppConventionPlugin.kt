@@ -17,10 +17,11 @@ class AndroidAppConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            apply(plugin = "com.google.dagger.hilt.android")
+            apply(plugin = "com.google.devtools.ksp")
 
             extensions.configure<ApplicationExtension> {
                 configureAppKotlinAndroid(this)
-                configureAndroidCompose(this)
                 configureAppSpecifics(this)
             }
 
@@ -43,6 +44,10 @@ class AndroidAppConventionPlugin : Plugin<Project> {
                 "implementation"(libs.findLibrary("androidx.ui.graphics").get())
                 "implementation"(libs.findLibrary("androidx.ui.tooling.preview").get())
                 "implementation"(libs.findLibrary("androidx.material3").get())
+
+                // Dependency Injection
+                "implementation"(libs.findLibrary("hilt.android").get())
+                "ksp"(libs.findLibrary("hilt.compiler").get())
 
                 // Test dependencies
                 "testImplementation"(libs.findLibrary("junit").get())

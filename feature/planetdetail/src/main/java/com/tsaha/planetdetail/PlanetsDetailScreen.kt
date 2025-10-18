@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.text.ParagraphStyle
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tsaha.feature.planetdetail.R
@@ -36,16 +37,26 @@ import com.tsaha.nucleus.ui.component.PlanetComposable
 import com.tsaha.nucleus.ui.component.PlanetNameComposable
 import com.tsaha.nucleus.ui.component.ProgressBarComposable
 import com.tsaha.nucleus.ui.theme.NucleusTheme
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 import com.tsaha.nucleus.ui.R as CommonR
 
+/**
+ * Planet details screen composable.
+ *
+ * @param planetId The ID of the planet to display
+ * @param navController Navigation controller for back navigation
+ * @param modifier Optional modifier
+ * @param vm ViewModel instance (injected with planetId)
+ */
 @Composable
 fun PlanetDetailsScreen(
     planetId: String,
     navController: NavController,
     modifier: Modifier = Modifier,
-    vm: PlanetDetailViewModel = koinViewModel { parametersOf(planetId) },
+    vm: PlanetDetailViewModel = hiltViewModel(
+        creationCallback = { factory: PlanetDetailViewModel.Factory ->
+            factory.create(planetId)
+        }
+    ),
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
 

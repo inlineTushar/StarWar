@@ -403,7 +403,7 @@ class PlanetDetailViewModelTest {
         // 2. Configure specific behavior
         coEvery { repository.getPlanet(testPlanetId) } returns Result.success(testPlanetDetails)
 
-        // 3. Create ViewModel with mock
+        // 3. Create ViewModel with direct parameters
         val vm = PlanetDetailViewModel(testPlanetId, repository)
 
         // 4. Trigger action

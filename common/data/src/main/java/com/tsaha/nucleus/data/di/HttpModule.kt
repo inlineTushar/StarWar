@@ -1,6 +1,10 @@
 package com.tsaha.nucleus.data.di
 
 import com.tsaha.nucleus.data.BuildConfig
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -11,14 +15,24 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.koin.dsl.module
+import javax.inject.Singleton
 
-val httpModule = module {
-    single<HttpClient> { httpClient() }
-}
+/**
+ * Network dependency injection module.
+ *
+ * Provides HttpClient configured with:
+ * - Content negotiation (JSON serialization)
+ * - Logging (debug builds only)
+ * - Timeout handling
+ * - OkHttp engine
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
 
-private fun httpClient(): HttpClient =
-    HttpClient(OkHttp) {
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
@@ -33,3 +47,4 @@ private fun httpClient(): HttpClient =
         install(HttpTimeout)
         expectSuccess = true
     }
+}

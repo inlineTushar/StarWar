@@ -8,13 +8,15 @@ import com.tsaha.nucleus.data.datasource.remote.PlanetRemoteDataSource
 import com.tsaha.nucleus.data.model.Pagination
 import com.tsaha.nucleus.data.model.Planet
 import com.tsaha.nucleus.data.model.PlanetDetails
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * Implementation of PlanetRepository using remote API
- * Acts as a single source of truth for planet data
- * @param planetApi The API interface for fetching planet data
+ * Implementation of PlanetRepository using remote API.
+ * Acts as a single source of truth for planet data.
  */
-class PlanetRepositoryImpl(
+@Singleton
+class PlanetRepositoryImpl @Inject constructor(
     private val remoteSource: PlanetRemoteDataSource,
     private val localSource: PlanetLocalDataSource
 ) : PlanetRepository {

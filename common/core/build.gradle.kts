@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.local.android.library)
+    alias(libs.plugins.local.android.library.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -16,11 +17,8 @@ dependencies {
     api(libs.androidx.lifecycle.runtime.compose)
     api(libs.androidx.lifecycle.viewmodel.savedstate)
 
-    // Koin - Dependency Injection
-    api(libs.koin.core)
-    api(libs.koin.android)
-    api(libs.koin.android.compat)
-    api(libs.koin.androidx.compose)
+    // Hilt - Compose integration
+    api(libs.hilt.navigation.compose)
 
     // Ktor - Networking
     api(libs.ktor.client.core)
@@ -41,8 +39,6 @@ dependencies {
     testImplementation(libs.junit)
     api(libs.assertk)
     testImplementation(libs.androidx.lifecycle.viewmodel.testing)
-    testImplementation(libs.koin.test)
-    testImplementation(libs.koin.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

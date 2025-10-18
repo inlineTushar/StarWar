@@ -14,13 +14,16 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Domain use case for planet list operations.
  * This class is UI-agnostic and returns domain-specific models.
  * The ViewModel layer is responsible for mapping these to UI states.
  */
-class PlanetListUseCase(
+@Singleton
+class PlanetListUseCase @Inject constructor(
     private val planetRepository: PlanetRepository
 ) {
     /**

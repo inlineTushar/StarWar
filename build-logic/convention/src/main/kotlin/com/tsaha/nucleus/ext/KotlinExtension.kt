@@ -22,13 +22,13 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.provideDelegate
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinTopLevelExtension
 
 /**
  * Configure base Kotlin options
  */
-internal inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() =
+internal inline fun <reified T : KotlinTopLevelExtension> Project.configureKotlin() =
     configure<T> {
         // Treat all Kotlin warnings as errors (disabled by default)
         // Override by setting warningsAsErrors=true in your ~/.gradle/gradle.properties
@@ -44,19 +44,7 @@ internal inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() 
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             )
-            freeCompilerArgs.add(
-                /**
-                 * Remove this args after Phase 3.
-                 * https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-consistent-copy-visibility/#deprecation-timeline
-                 *
-                 * Deprecation timeline
-                 * Phase 3. (Supposedly Kotlin 2.2 or Kotlin 2.3).
-                 * The default changes.
-                 * Unless ExposedCopyVisibility is used, the generated 'copy' method has the same visibility as the primary constructor.
-                 * The binary signature changes. The error on the declaration is no longer reported.
-                 * '-Xconsistent-data-class-copy-visibility' compiler flag and ConsistentCopyVisibility annotation are now unnecessary.
-                 */
-                "-Xconsistent-data-class-copy-visibility",
-            )
+            // Note: Removed -Xconsistent-data-class-copy-visibility flag
+            // This flag is for Kotlin 2.2+ and not needed/supported in Kotlin 2.0.21
         }
     }

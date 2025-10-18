@@ -12,6 +12,7 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "local.android.library")
+            apply(plugin = "local.android.library.hilt")
 
             extensions.configure<LibraryExtension> {
                 testOptions.animationsDisabled = true
@@ -51,8 +52,6 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 "testImplementation"(libs.findLibrary("mockk").get())
                 "testImplementation"(libs.findLibrary("kotlinx.coroutines.test").get())
                 "testImplementation"(libs.findLibrary("turbine").get())
-                "testImplementation"(libs.findLibrary("koin.test").get())
-                "testImplementation"(libs.findLibrary("koin.test.junit4").get())
                 "testImplementation"(libs.findLibrary("junit").get())
                 "testImplementation"(project(":common:core"))
 
@@ -63,7 +62,7 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 add("debugImplementation", libs.findLibrary("androidx.ui.test.manifest").get())
                 add("debugImplementation", libs.findLibrary("androidx.ui.tooling").get())
 
-                // Additional UI testing dependencies for Phase 4 Integration Tests
+                // Additional UI testing dependencies for integration tests
                 add("androidTestImplementation", "androidx.test.ext:junit:1.2.1")
                 add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.6.1")
                 add("androidTestImplementation", "androidx.compose.ui:ui-test-junit4:1.7.5")
@@ -71,9 +70,6 @@ class AndroidLibraryFeatureConventionPlugin : Plugin<Project> {
                 add("androidTestImplementation", "com.willowtreeapps.assertk:assertk:0.28.1")
                 add("debugImplementation", "androidx.compose.ui:ui-test-manifest:1.7.5")
                 add("debugImplementation", "androidx.compose.ui:ui-tooling:1.7.5")
-
-                // Note: AssertK is also inherited from :common:core as api dependency for unit tests
-                // Note: Additional UI Testing capabilities inherited from :common:ui for Phase 1-3 tests
             }
         }
     }
